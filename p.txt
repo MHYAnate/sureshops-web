@@ -1,0 +1,1655 @@
+export interface State {
+  id: string;
+  name: string;
+  code: string;
+  capital?: string;
+  isActive: boolean;
+}
+
+export interface Area {
+  id: string;
+  name: string;
+  stateId: string;
+  localGovernment?: string;
+  postalCode?: string;
+  isActive: boolean;
+}
+
+export interface Market {
+  id: string;
+  name: string;
+  type: 'traditional_market' | 'shopping_mall' | 'plaza' | 'shopping_complex' | 'street_market';
+  stateId: string;
+  areaId: string;
+  address?: string;
+  landmark?: string;
+  entrancePhoto?: string;
+  layoutMap?: string;
+  totalShops: number;
+  isActive: boolean;
+  isVerified: boolean;
+}
+
+export interface LocationInfo {
+  state: { id: string; name: string };
+  area: { id: string; name: string };
+  market?: { id: string; name: string; type: string };
+  shopNumber?: string;
+  shopFloor?: string;
+  shopBlock?: string;
+  shopAddress?: string;
+  landmark?: string;
+  coordinates?: [number, number];
+  distance?: number;
+}
+import { Vendor, VendorListing } from './vendor';
+import { LocationInfo } from './location';
+
+export interface Product {
+  id: string;
+  vendorId: string | Vendor;
+  catalogItemId?: string;
+  name: string;
+  description?: string;
+  sku?: string;
+  barcode?: string;
+  brand?: string;
+  type: 'sale' | 'lease' | 'rent' | 'service';
+  price: number;
+  originalPrice?: number;
+  currency: string;
+  images: string[];
+  category: string;
+  subcategory?: string;
+  tags: string[];
+  quantity: number;
+  unit?: string;
+  specifications?: Record<string, any>;
+  status: 'draft' | 'pending' | 'approved' | 'rejected' | 'out_of_stock' | 'discontinued';
+  views: number;
+  inStock: boolean;
+  stateId?: string;
+  areaId?: string;
+  marketId?: string;
+  location?: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProductSearchResult {
+  id: string;
+  name: string;
+  description?: string;
+  brand?: string;
+  category: string;
+  subcategory?: string;
+  images: string[];
+  price: number;
+  originalPrice?: number;
+  currency: string;
+  inStock: boolean;
+  vendor: {
+    id: string;
+    businessName: string;
+    logo?: string;
+    rating: number;
+    isVerified: boolean;
+    contactDetails: {
+      phone: string;
+      whatsapp?: string;
+    };
+  };
+  location: LocationInfo;
+}
+
+export interface ProductWithVendors {
+  id: string;
+  catalogItemId?: string;
+  name: string;
+  description?: string;
+  brand?: string;
+  category: string;
+  subcategory?: string;
+  images: string[];
+  priceRange: {
+    lowest: number;
+    highest: number;
+    average: number;
+    currency: string;
+  };
+  totalVendors: number;
+  vendors: VendorListing[];
+}
+
+export interface ProductFilters {
+  search?: string;
+  category?: string;
+  subcategory?: string;
+  brand?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  stateId?: string;
+  areaId?: string;
+  marketId?: string;
+  inStock?: boolean;
+  sortBy?: 'relevance' | 'price_low' | 'price_high' | 'newest' | 'rating';
+  page?: number;
+  limit?: number;
+}
+import { ProductSearchResult, ProductWithVendors } from './product';
+import { ShopSearchResult } from './vendor';
+
+export type SearchType = 'products' | 'shops' | 'all';
+export type SortBy = 'relevance' | 'price_low' | 'price_high' | 'rating' | 'newest' | 'distance' | 'popularity';
+
+export interface SearchFilters {
+  query: string;
+  searchType?: SearchType;
+  stateId?: string;
+  areaId?: string;
+  marketId?: string;
+  longitude?: number;
+  latitude?: number;
+  maxDistance?: number;
+  category?: string;
+  subcategory?: string;
+  brand?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  inStock?: boolean;
+  verifiedOnly?: boolean;
+  tags?: string[];
+  sortBy?: SortBy;
+  page?: number;
+  limit?: number;
+}
+
+export interface FilterOption {
+  id: string;
+  name: string;
+  count: number;
+}
+
+export interface AvailableFilters {
+  states: FilterOption[];
+  areas: FilterOption[];
+  markets: FilterOption[];
+  categories: { name: string; count: number }[];
+  brands: { name: string; count: number }[];
+  priceRange: { min: number; max: number };
+}
+
+export interface SearchResults {
+  query: string;
+  searchType: string;
+  products?: {
+    items: ProductSearchResult[];
+    total: number;
+    page: number;
+    totalPages: number;
+  };
+  shops?: {
+    items: ShopSearchResult[];
+    total: number;
+    page: number;
+    totalPages: number;
+  };
+  productComparison?: {
+    items: ProductWithVendors[];
+    total: number;
+  };
+  availableFilters: AvailableFilters;
+  meta: {
+    timestamp: string;
+    took: number;
+  };
+}
+import { LocationInfo } from './location';
+
+export interface BankDetails {
+  bankName: string;
+  accountName: string;
+  accountNumber: string;
+  bankCode?: string;
+}
+
+export interface ContactDetails {
+  phone: string;
+  alternatePhone?: string;
+  email?: string;
+  whatsapp?: string;
+  instagram?: string;
+  facebook?: string;
+  twitter?: string;
+  website?: string;
+}
+
+export interface ShopImages {
+  entrancePhoto?: string;
+  logo?: string;
+  layoutMap?: string;
+  additionalImages?: string[];
+}
+
+export interface OperatingHours {
+  openingTime?: string;
+  closingTime?: string;
+  operatingDays?: string[];
+  is24Hours?: boolean;
+}
+
+export interface Vendor {
+  id: string;
+  userId: string;
+  businessName: string;
+  businessDescription?: string;
+  vendorType: 'market_shop' | 'mall_shop' | 'home_based' | 'street_shop' | 'online_only';
+  stateId: string;
+  areaId: string;
+  marketId?: string;
+  shopNumber?: string;
+  shopFloor?: string;
+  shopBlock?: string;
+  shopAddress?: string;
+  landmark?: string;
+  location?: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+  shopImages?: ShopImages;
+  contactDetails: ContactDetails;
+  bankDetails?: BankDetails;
+  operatingHours?: OperatingHours;
+  categories: string[];
+  tags: string[];
+  totalProducts: number;
+  totalViews: number;
+  rating: number;
+  reviewCount: number;
+  minProductPrice: number;
+  maxProductPrice: number;
+  isActive: boolean;
+  isVerified: boolean;
+  isFeatured: boolean;
+  isOpen: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VendorListing {
+  vendorId: string;
+  productId: string;
+  businessName: string;
+  logo?: string;
+  entrancePhoto?: string;
+  rating: number;
+  isVerified: boolean;
+  price: number;
+  originalPrice?: number;
+  inStock: boolean;
+  quantity: number;
+  contactDetails: ContactDetails;
+  bankDetails?: BankDetails;
+  location: LocationInfo;
+  operatingHours?: {
+    openingTime?: string;
+    closingTime?: string;
+    operatingDays?: string[];
+    isOpen: boolean;
+  };
+}
+
+export interface ShopSearchResult {
+  id: string;
+  businessName: string;
+  businessDescription?: string;
+  vendorType: string;
+  logo?: string;
+  entrancePhoto?: string;
+  layoutMap?: string;
+  rating: number;
+  reviewCount: number;
+  totalProducts: number;
+  isVerified: boolean;
+  isFeatured: boolean;
+  categories: string[];
+  priceRange: {
+    min: number;
+    max: number;
+  };
+  contactDetails: Partial<ContactDetails>;
+  bankDetails?: BankDetails;
+  location: LocationInfo;
+  operatingHours?: OperatingHours & { isOpen: boolean };
+  featuredProducts?: {
+    id: string;
+    name: string;
+    price: number;
+    image?: string;
+  }[];
+}
+import { create } from "zustand";
+import { SearchFilters, AvailableFilters } from "@/types";
+
+interface SearchState {
+  query: string;
+  filters: Partial<SearchFilters>;
+  availableFilters: AvailableFilters | null;
+  recentSearches: string[];
+  setQuery: (query: string) => void;
+  setFilters: (filters: Partial<SearchFilters>) => void;
+  updateFilter: (key: keyof SearchFilters, value: any) => void;
+  clearFilters: () => void;
+  setAvailableFilters: (filters: AvailableFilters) => void;
+  addRecentSearch: (search: string) => void;
+  clearRecentSearches: () => void;
+}
+
+export const useSearchStore = create<SearchState>((set, get) => ({
+  query: "",
+  filters: {},
+  availableFilters: null,
+  recentSearches: [],
+  
+  setQuery: (query) => set({ query }),
+  
+  setFilters: (filters) => set({ filters }),
+  
+  updateFilter: (key, value) =>
+    set((state) => ({
+      filters: { ...state.filters, [key]: value },
+    })),
+  
+  clearFilters: () => set({ filters: {}, query: "" }),
+  
+  setAvailableFilters: (availableFilters) => set({ availableFilters }),
+  
+  addRecentSearch: (search) =>
+    set((state) => ({
+      recentSearches: [search, ...state.recentSearches.filter((s) => s !== search)].slice(0, 10),
+    })),
+  
+  clearRecentSearches: () => set({ recentSearches: [] }),
+}));
+import { create } from "zustand";
+import { State, Area, Market } from "@/types";
+
+interface FilterState {
+  selectedState: State | null;
+  selectedArea: Area | null;
+  selectedMarket: Market | null;
+  states: State[];
+  areas: Area[];
+  markets: Market[];
+  setSelectedState: (state: State | null) => void;
+  setSelectedArea: (area: Area | null) => void;
+  setSelectedMarket: (market: Market | null) => void;
+  setStates: (states: State[]) => void;
+  setAreas: (areas: Area[]) => void;
+  setMarkets: (markets: Market[]) => void;
+  clearLocationFilters: () => void;
+}
+
+export const useFilterStore = create<FilterState>((set) => ({
+  selectedState: null,
+  selectedArea: null,
+  selectedMarket: null,
+  states: [],
+  areas: [],
+  markets: [],
+  
+  setSelectedState: (selectedState) =>
+    set({ selectedState, selectedArea: null, selectedMarket: null, areas: [], markets: [] }),
+  
+  setSelectedArea: (selectedArea) =>
+    set({ selectedArea, selectedMarket: null, markets: [] }),
+  
+  setSelectedMarket: (selectedMarket) => set({ selectedMarket }),
+  
+  setStates: (states) => set({ states }),
+  
+  setAreas: (areas) => set({ areas }),
+  
+  setMarkets: (markets) => set({ markets }),
+  
+  clearLocationFilters: () =>
+    set({
+      selectedState: null,
+      selectedArea: null,
+      selectedMarket: null,
+      areas: [],
+      markets: [],
+    }),
+}));import Cookies from "js-cookie";
+import { User } from "@/types";
+
+const TOKEN_KEY = "access_token";
+const USER_KEY = "user";
+
+export const auth = {
+  setToken(token: string): void {
+    Cookies.set(TOKEN_KEY, token, { expires: 7 });
+  },
+
+  getToken(): string | undefined {
+    return Cookies.get(TOKEN_KEY);
+  },
+
+  removeToken(): void {
+    Cookies.remove(TOKEN_KEY);
+  },
+
+  setUser(user: User): void {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
+    }
+  },
+
+  getUser(): User | null {
+    if (typeof window !== "undefined") {
+      const user = localStorage.getItem(USER_KEY);
+      return user ? JSON.parse(user) : null;
+    }
+    return null;
+  },
+
+  removeUser(): void {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(USER_KEY);
+    }
+  },
+
+  isAuthenticated(): boolean {
+    return !!this.getToken();
+  },
+
+  logout(): void {
+    this.removeToken();
+    this.removeUser();
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+  },
+};import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
+import Cookies from "js-cookie";
+import { ApiError } from "@/types";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
+class ApiClient {
+  private client: AxiosInstance;
+
+  constructor() {
+    this.client = axios.create({
+      baseURL: `${API_URL}/api/v1`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      timeout: 30000,
+    });
+
+    // Request interceptor
+    this.client.interceptors.request.use(
+      (config) => {
+        const token = Cookies.get("access_token");
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+
+    // Response interceptor
+    this.client.interceptors.response.use(
+      (response) => response,
+      (error: AxiosError<ApiError>) => {
+        if (error.response?.status === 401) {
+          Cookies.remove("access_token");
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    const response = await this.client.get<{ data: T }>(url, config);
+    return response.data.data;
+  }
+
+  async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    const response = await this.client.post<{ data: T }>(url, data, config);
+    return response.data.data;
+  }
+
+  async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    const response = await this.client.put<{ data: T }>(url, data, config);
+    return response.data.data;
+  }
+
+  async patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    const response = await this.client.patch<{ data: T }>(url, data, config);
+    return response.data.data;
+  }
+
+  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    const response = await this.client.delete<{ data: T }>(url, config);
+    return response.data.data;
+  }
+
+  async uploadFile(url: string, file: File, fieldName: string = "file"): Promise<any> {
+    const formData = new FormData();
+    formData.append(fieldName, file);
+
+    const response = await this.client.post(url, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data.data;
+  }
+}
+
+export const api = new ApiClient();
+export interface OperatingHours {
+  openingTime?: string;
+  closingTime?: string;
+  operatingDays?: string[];
+  is24Hours?: boolean;
+}
+
+export interface ContactDetails {
+  phone: string;
+  whatsapp?: string;
+  email?: string;
+  website?: string;
+  instagram?: string;
+  facebook?: string;
+  twitter?: string;
+  alternatePhone?: string;
+}
+
+export interface BankDetails {
+  bankName?: string;
+  accountName?: string;
+  accountNumber?: string;
+  bankCode?: string;
+}
+
+export interface VendorFormData {
+  businessName: string;
+  vendorType: string;
+  businessDescription?: string;
+  stateId: string;
+  areaId: string;
+  marketId?: string;
+  shopNumber?: string;
+  shopFloor?: string;
+  shopBlock?: string;
+  shopAddress?: string;
+  landmark?: string;
+  contactDetails: ContactDetails;
+  bankDetails?: BankDetails;
+  operatingHours?: OperatingHours;
+  categories?: string[];
+  tags?: string[];
+}import { z } from "zod";
+
+export const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+export const registerSchema = z.object({
+  firstName: z.string().min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  phone: z.string().min(10, "Invalid phone number"),
+});
+
+export const productSchema = z.object({
+  name: z.string().min(2, "Product name is required"),
+  description: z.string().optional(),
+  price: z.number().min(0, "Price must be positive"),
+  originalPrice: z.number().optional(),
+  category: z.string().min(1, "Category is required"),
+  subcategory: z.string().optional(),
+  brand: z.string().optional(),
+  quantity: z.number().min(0).default(0),
+  inStock: z.boolean().default(true),
+  images: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+});
+
+export const vendorSchema = z.object({
+  businessName: z.string().min(2, "Business name is required"),
+  businessDescription: z.string().optional(),
+  vendorType: z.enum(["market_shop", "mall_shop", "home_based", "street_shop", "online_only"]),
+  stateId: z.string().min(1, "State is required"),
+  areaId: z.string().min(1, "Area is required"),
+  marketId: z.string().optional(),
+  shopNumber: z.string().optional(),
+  shopAddress: z.string().optional(),
+  contactDetails: z.object({
+    phone: z.string().min(10, "Phone is required"),
+    whatsapp: z.string().optional(),
+    email: z.string().email().optional(),
+  }),
+  bankDetails: z.object({
+    bankName: z.string().optional(),
+    accountName: z.string().optional(),
+    accountNumber: z.string().optional(),
+  }).optional(),
+  categories: z.array(z.string()).optional(),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type ProductInput = z.infer<typeof productSchema>;
+export type VendorInput = z.infer<typeof vendorSchema>;
+import { api } from "@/lib/api";
+import { Vendor, ShopSearchResult } from "@/types";
+
+export const vendorService = {
+  async getAll(filters?: any): Promise<{ vendors: Vendor[]; total: number; page: number; totalPages: number }> {
+    const params = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          params.append(key, String(value));
+        }
+      });
+    }
+    return api.get(`/vendors?${params.toString()}`);
+  },
+
+  async getById(id: string): Promise<Vendor> {
+    return api.get<Vendor>(`/vendors/${id}`);
+  },
+
+  async getMyProfile(): Promise<Vendor> {
+    return api.get<Vendor>("/vendors/my-profile");
+  },
+
+  async getByMarket(marketId: string): Promise<Vendor[]> {
+    return api.get<Vendor[]>(`/vendors/market/${marketId}`);
+  },
+
+  async getNearby(longitude: number, latitude: number, distance?: number): Promise<Vendor[]> {
+    const params = new URLSearchParams({
+      longitude: String(longitude),
+      latitude: String(latitude),
+    });
+    if (distance) params.append("distance", String(distance));
+    return api.get<Vendor[]>(`/vendors/nearby?${params.toString()}`);
+  },
+
+  async create(data: Partial<Vendor>): Promise<Vendor> {
+    return api.post<Vendor>("/vendors", data);
+  },
+
+  async update(id: string, data: Partial<Vendor>): Promise<Vendor> {
+    return api.put<Vendor>(`/vendors/${id}`, data);
+  },
+
+  async delete(id: string): Promise<void> {
+    return api.delete(`/vendors/${id}`);
+  },
+};import { api } from "@/lib/api";
+import { SearchFilters, SearchResults, ProductWithVendors } from "@/types";
+
+export const searchService = {
+  async search(filters: SearchFilters): Promise<SearchResults> {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        params.append(key, String(value));
+      }
+    });
+    return api.get<SearchResults>(`/search?${params.toString()}`);
+  },
+
+  async searchProducts(filters: SearchFilters): Promise<SearchResults["products"]> {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        params.append(key, String(value));
+      }
+    });
+    return api.get<SearchResults["products"]>(`/search/products?${params.toString()}`);
+  },
+
+  async searchShops(filters: SearchFilters): Promise<SearchResults["shops"]> {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        params.append(key, String(value));
+      }
+    });
+    return api.get<SearchResults["shops"]>(`/search/shops?${params.toString()}`);
+  },
+
+  async getProductVendors(productName: string, filters?: Partial<SearchFilters>): Promise<ProductWithVendors> {
+    const params = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          params.append(key, String(value));
+        }
+      });
+    }
+    return api.get<ProductWithVendors>(`/search/product/${encodeURIComponent(productName)}/vendors?${params.toString()}`);
+  },
+
+  async getShopProducts(vendorId: string, filters?: { category?: string; minPrice?: number; maxPrice?: number; page?: number }): Promise<any> {
+    const params = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          params.append(key, String(value));
+        }
+      });
+    }
+    return api.get(`/search/shop/${vendorId}/products?${params.toString()}`);
+  },
+
+  async getSimilarProducts(productId: string, limit: number = 10): Promise<any[]> {
+    return api.get(`/search/product/${productId}/similar?limit=${limit}`);
+  },
+};import { api } from "@/lib/api";
+import { Product, ProductFilters, PaginatedResponse } from "@/types";
+
+export const productService = {
+  async getAll(filters?: ProductFilters): Promise<PaginatedResponse<Product>> {
+    const params = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          params.append(key, String(value));
+        }
+      });
+    }
+    return api.get<any>(`/products?${params.toString()}`).then((res) => ({
+      items: res.products || [],
+      total: res.total || 0,
+      page: res.page || 1,
+      totalPages: res.totalPages || 1,
+    }));
+  },
+
+  async getById(id: string): Promise<Product> {
+    return api.get<Product>(`/products/${id}`);
+  },
+
+  async getByVendor(vendorId: string): Promise<Product[]> {
+    return api.get<Product[]>(`/products/vendor/${vendorId}`);
+  },
+
+  async getMyProducts(): Promise<Product[]> {
+    return api.get<Product[]>("/products/my-products");
+  },
+
+  async getNearby(longitude: number, latitude: number, distance?: number, category?: string): Promise<Product[]> {
+    const params = new URLSearchParams({
+      longitude: String(longitude),
+      latitude: String(latitude),
+    });
+    if (distance) params.append("distance", String(distance));
+    if (category) params.append("category", category);
+    return api.get<Product[]>(`/products/nearby?${params.toString()}`);
+  },
+
+  async create(data: Partial<Product>): Promise<Product> {
+    return api.post<Product>("/products", data);
+  },
+
+  async update(id: string, data: Partial<Product>): Promise<Product> {
+    return api.put<Product>(`/products/${id}`, data);
+  },
+
+  async delete(id: string): Promise<void> {
+    return api.delete(`/products/${id}`);
+  },
+};import { api } from "@/lib/api";
+import { State, Area, Market } from "@/types";
+
+export const locationService = {
+  async getStates(): Promise<State[]> {
+    return api.get<State[]>("/states");
+  },
+
+  async getAreasByState(stateId: string): Promise<Area[]> {
+    return api.get<Area[]>(`/areas/state/${stateId}`);
+  },
+
+  async getMarketsByArea(areaId: string): Promise<Market[]> {
+    return api.get<Market[]>(`/markets/area/${areaId}`);
+  },
+
+  async getMarketById(id: string): Promise<Market> {
+    return api.get<Market>(`/markets/${id}`);
+  },
+
+  async getNearbyMarkets(longitude: number, latitude: number, distance?: number): Promise<Market[]> {
+    const params = new URLSearchParams({
+      longitude: String(longitude),
+      latitude: String(latitude),
+    });
+    if (distance) params.append("distance", String(distance));
+    return api.get<Market[]>(`/markets/nearby?${params.toString()}`);
+  },
+};"use client";
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { vendorService, searchService } from "@/services";
+import { Vendor } from "@/types";
+import toast from "react-hot-toast";
+
+export function useShops(filters?: any) {
+  return useQuery({
+    queryKey: ["shops", filters],
+    queryFn: () => vendorService.getAll(filters),
+    staleTime: 60000,
+  });
+}
+
+export function useShop(id: string) {
+  return useQuery({
+    queryKey: ["shop", id],
+    queryFn: () => vendorService.getById(id),
+    enabled: !!id,
+  });
+}
+
+export function useShopProducts(vendorId: string, filters?: any) {
+  return useQuery({
+    queryKey: ["shop-products", vendorId, filters],
+    queryFn: () => searchService.getShopProducts(vendorId, filters),
+    enabled: !!vendorId,
+  });
+}
+
+export function useMyShop() {
+  return useQuery({
+    queryKey: ["my-shop"],
+    queryFn: () => vendorService.getMyProfile(),
+  });
+}
+
+export function useCreateVendor() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: Partial<Vendor>) => vendorService.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-shop"] });
+      toast.success("Shop created successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to create shop");
+    },
+  });
+}
+
+export function useUpdateVendor() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<Vendor> }) =>
+      vendorService.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-shop"] });
+      toast.success("Shop updated successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to update shop");
+    },
+  });
+}"use client";
+
+import { useState, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useSearchStore } from "@/store";
+import { searchService } from "@/services";
+import { SearchFilters, SearchResults } from "@/types";
+import { useDebounce } from "./use-debounce";
+
+export function useSearch() {
+  const { query, filters, setQuery, setFilters, updateFilter, clearFilters, addRecentSearch } = useSearchStore();
+  const debouncedQuery = useDebounce(query, 300);
+
+  const searchFilters: SearchFilters = {
+    query: debouncedQuery,
+    ...filters,
+  };
+
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ["search", searchFilters],
+    queryFn: () => searchService.search(searchFilters),
+    enabled: debouncedQuery.length > 0 || Object.keys(filters).length > 0,
+    staleTime: 30000,
+  });
+
+  const handleSearch = useCallback(
+    (newQuery: string) => {
+      setQuery(newQuery);
+      if (newQuery.trim()) {
+        addRecentSearch(newQuery.trim());
+      }
+    },
+    [setQuery, addRecentSearch]
+  );
+
+  return {
+    query,
+    filters,
+    results: data,
+    isLoading,
+    error,
+    setQuery: handleSearch,
+    setFilters,
+    updateFilter,
+    clearFilters,
+    refetch,
+  };
+}"use client";
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { productService } from "@/services";
+import { ProductFilters, Product } from "@/types";
+import toast from "react-hot-toast";
+
+export function useProducts(filters?: ProductFilters) {
+  return useQuery({
+    queryKey: ["products", filters],
+    queryFn: () => productService.getAll(filters),
+    staleTime: 60000,
+  });
+}
+
+export function useProduct(id: string) {
+  return useQuery({
+    queryKey: ["product", id],
+    queryFn: () => productService.getById(id),
+    enabled: !!id,
+  });
+}
+
+export function useMyProducts() {
+  return useQuery({
+    queryKey: ["my-products"],
+    queryFn: () => productService.getMyProducts(),
+  });
+}
+
+export function useCreateProduct() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: Partial<Product>) => productService.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-products"] });
+      toast.success("Product created successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to create product");
+    },
+  });
+}
+
+export function useUpdateProduct() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<Product> }) =>
+      productService.update(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["product", id] });
+      queryClient.invalidateQueries({ queryKey: ["my-products"] });
+      toast.success("Product updated successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to update product");
+    },
+  });
+}
+
+export function useDeleteProduct() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => productService.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-products"] });
+      toast.success("Product deleted successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to delete product");
+    },
+  });
+}"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { useFilterStore } from "@/store";
+import { locationService } from "@/services";
+
+export function useLocation() {
+  const {
+    selectedState,
+    selectedArea,
+    selectedMarket,
+    states,
+    areas,
+    markets,
+    setSelectedState,
+    setSelectedArea,
+    setSelectedMarket,
+    setStates,
+    setAreas,
+    setMarkets,
+    clearLocationFilters,
+  } = useFilterStore();
+
+  const [loading, setLoading] = useState(false);
+
+  // Fetch states on mount
+  useEffect(() => {
+    const fetchStates = async () => {
+      try {
+        setLoading(true);
+        const data = await locationService.getStates();
+        setStates(data);
+      } catch (error) {
+        console.error("Failed to fetch states:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (states.length === 0) {
+      fetchStates();
+    }
+  }, [states.length, setStates]);
+
+  // Fetch areas when state changes
+  useEffect(() => {
+    const fetchAreas = async () => {
+      if (!selectedState) {
+        setAreas([]);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const data = await locationService.getAreasByState(selectedState.id);
+        setAreas(data);
+      } catch (error) {
+        console.error("Failed to fetch areas:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAreas();
+  }, [selectedState, setAreas]);
+
+  // Fetch markets when area changes
+  useEffect(() => {
+    const fetchMarkets = async () => {
+      if (!selectedArea) {
+        setMarkets([]);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const data = await locationService.getMarketsByArea(selectedArea.id);
+        setMarkets(data);
+      } catch (error) {
+        console.error("Failed to fetch markets:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMarkets();
+  }, [selectedArea, setMarkets]);
+
+  const getLocationString = useCallback(() => {
+    const parts = [];
+    if (selectedMarket) parts.push(selectedMarket.name);
+    if (selectedArea) parts.push(selectedArea.name);
+    if (selectedState) parts.push(selectedState.name);
+    return parts.join(", ");
+  }, [selectedState, selectedArea, selectedMarket]);
+
+  return {
+    states,
+    areas,
+    markets,
+    selectedState,
+    selectedArea,
+    selectedMarket,
+    loading,
+    setSelectedState,
+    setSelectedArea,
+    setSelectedMarket,
+    clearLocationFilters,
+    getLocationString,
+    locationFilters: {
+      stateId: selectedState?.id,
+      areaId: selectedArea?.id,
+      marketId: selectedMarket?.id,
+    },
+  };
+}"use client";
+
+import { useState, useEffect } from "react";
+
+export function useDebounce<T>(value: T, delay: number = 500): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store";
+import { authService } from "@/services";
+import { auth } from "@/lib/auth";
+
+export function useAuth(requireAuth: boolean = false) {
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading, setUser, setLoading, logout } = useAuthStore();
+
+  useEffect(() => {
+    const initAuth = async () => {
+      const token = auth.getToken();
+      if (token) {
+        try {
+          const userData = await authService.getMe();
+          setUser(userData);
+        } catch (error) {
+          auth.removeToken();
+          auth.removeUser();
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+
+    initAuth();
+  }, [setUser]);
+
+  useEffect(() => {
+    if (!isLoading && requireAuth && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isLoading, requireAuth, isAuthenticated, router]);
+
+  return {
+    user,
+    isAuthenticated,
+    isLoading,
+    logout,
+    isVendor: user?.role === "vendor" || user?.role === "admin" || user?.role === "super_admin",
+    isAdmin: user?.role === "admin" || user?.role === "super_admin",
+    isSuperAdmin: user?.role === "super_admin",
+  };
+}
+"use client";
+
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button, Input, Select } from "@/components/ui";
+import { useLocation } from "@/hooks";
+import { vendorSchema, VendorInput } from "@/lib/validations";
+import { VENDOR_TYPES, NIGERIAN_BANKS } from "@/lib/constants";
+
+interface VendorFormProps {
+  initialData?: Partial<VendorInput>;
+  onSubmit: (data: any) => Promise<void>;
+  isLoading?: boolean;
+}
+
+export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps) {
+  const {
+    states,
+    areas,
+    markets,
+    selectedState,
+    selectedArea,
+    setSelectedState,
+    setSelectedArea,
+    setSelectedMarket,
+  } = useLocation();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+    reset,
+  } = useForm<VendorInput>({
+    resolver: zodResolver(vendorSchema),
+    defaultValues: initialData || {
+      vendorType: "market_shop",
+      contactDetails: { phone: "" },
+      bankDetails: {},
+      categories: [],
+    },
+  });
+
+  // Watch values for rendering
+  const stateId = watch("stateId");
+  const areaId = watch("areaId");
+  const marketId = watch("marketId");
+  const vendorType = watch("vendorType");
+
+  // Sync initialData with location state on mount/edit
+  useEffect(() => {
+    if (initialData?.stateId) {
+      const state = states.find((s) => s.id === initialData.stateId);
+      if (state) setSelectedState(state);
+    }
+    if (initialData?.areaId) {
+      const area = areas.find((a) => a.id === initialData.areaId);
+      if (area) setSelectedArea(area);
+    }
+    if (initialData?.marketId) {
+      const market = markets.find((m) => m.id === initialData.marketId);
+      if (market) setSelectedMarket(market);
+    }
+  }, [initialData, states, areas, markets, setSelectedState, setSelectedArea, setSelectedMarket]);
+
+  // Reset form when initialData changes (for edit mode)
+  useEffect(() => {
+    if (initialData) {
+      reset(initialData);
+    }
+  }, [initialData, reset]);
+
+  const handleStateChange = (stateId: string) => {
+    const state = states.find((s) => s.id === stateId);
+    setSelectedState(state || null);
+    setValue("stateId", stateId, { shouldValidate: true });
+    setValue("areaId", "", { shouldValidate: true });
+    setValue("marketId", undefined, { shouldValidate: true });
+    setSelectedArea(null);
+    setSelectedMarket(null);
+  };
+
+  const handleAreaChange = (areaId: string) => {
+    const area = areas.find((a) => a.id === areaId);
+    setSelectedArea(area || null);
+    setValue("areaId", areaId, { shouldValidate: true });
+    setValue("marketId", undefined, { shouldValidate: true });
+    setSelectedMarket(null);
+  };
+
+  const handleMarketChange = (marketId: string) => {
+    const market = markets.find((m) => m.id === marketId);
+    setSelectedMarket(market || null);
+    setValue("marketId", marketId || undefined, { shouldValidate: true });
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      {/* Business Info */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold border-b border-border pb-2">
+          Business Information
+        </h3>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">
+            Business Name <span className="text-destructive">*</span>
+          </label>
+          <Input
+            {...register("businessName")}
+            error={errors.businessName?.message}
+            placeholder="Your shop or business name"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Description</label>
+          <textarea
+            {...register("businessDescription")}
+            className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm min-h-[100px] focus:outline-none focus:ring-2 focus:ring-ring"
+            placeholder="Tell customers about your business, what you sell, specialties..."
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">
+            Vendor Type <span className="text-destructive">*</span>
+          </label>
+          <Select
+            value={vendorType}
+            onChange={(value) => setValue("vendorType", value as any, { shouldValidate: true })}
+            options={VENDOR_TYPES}
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Choose the type that best describes your business location
+          </p>
+        </div>
+      </div>
+
+      {/* Location */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold border-b border-border pb-2">
+          Location
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              State <span className="text-destructive">*</span>
+            </label>
+            <Select
+              key={`state-${states.length}`} // Force re-render if states change
+              value={stateId || ""}
+              onChange={handleStateChange}
+              options={states.map((s) => ({ value: s.id, label: s.name }))}
+              placeholder="Select state"
+              error={errors.stateId?.message}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Area <span className="text-destructive">*</span>
+            </label>
+            <Select
+              key={`area-${selectedState?.id || 'none'}-${areas.length}`} // Re-render when state changes
+              value={areaId || ""}
+              onChange={handleAreaChange}
+              options={areas.map((a) => ({ value: a.id, label: a.name }))}
+              placeholder={selectedState ? "Select area" : "Select state first"}
+              disabled={!selectedState || areas.length === 0}
+              error={errors.areaId?.message}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Market / Mall</label>
+            <Select
+              key={`market-${selectedArea?.id || 'none'}-${markets.length}`} // Re-render when area changes
+              value={marketId || ""}
+              onChange={handleMarketChange}
+              options={[
+                { value: "", label: "None (Home-based / Street)" },
+                ...markets.map((m) => ({ value: m.id, label: m.name })),
+              ]}
+              placeholder={selectedArea ? "Select market" : "Select area first"}
+              disabled={!selectedArea || markets.length === 0}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Shop Number</label>
+            <Input
+              {...register("shopNumber")}
+              placeholder="e.g., Shop 45, Stall 12"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Floor</label>
+            <Input
+              {...register("shopFloor" as any)}
+              placeholder="e.g., Ground Floor, 2nd Floor"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Block</label>
+            <Input
+              {...register("shopBlock" as any)}
+              placeholder="e.g., Block A, Plaza B"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Shop Address</label>
+          <Input
+            {...register("shopAddress")}
+            placeholder="Full address for customers to find you"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Landmark</label>
+          <Input
+            {...register("landmark" as any)}
+            placeholder="Nearby landmark for easy location"
+          />
+        </div>
+      </div>
+
+      {/* Contact Details */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold border-b border-border pb-2">
+          Contact Information
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Phone Number <span className="text-destructive">*</span>
+            </label>
+            <Input
+              {...register("contactDetails.phone")}
+              placeholder="08012345678"
+              error={errors.contactDetails?.phone?.message}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              WhatsApp Number
+            </label>
+            <Input
+              {...register("contactDetails.whatsapp")}
+              placeholder="WhatsApp number (if different)"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Email</label>
+            <Input
+              type="email"
+              {...register("contactDetails.email")}
+              placeholder="business@example.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Website</label>
+            <Input
+              {...register("contactDetails.website" as any)}
+              placeholder="https://yourwebsite.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Instagram</label>
+            <Input
+              {...register("contactDetails.instagram" as any)}
+              placeholder="@yourusername"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Facebook</label>
+            <Input
+              {...register("contactDetails.facebook" as any)}
+              placeholder="facebook.com/yourpage"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Bank Details */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold border-b border-border pb-2">
+          Bank Details
+          <span className="text-sm font-normal text-muted-foreground ml-2">
+            (For customers to make direct payments)
+          </span>
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Bank Name</label>
+            <Select
+              value={watch("bankDetails.bankName") || ""}
+              onChange={(value) => setValue("bankDetails.bankName", value, { shouldValidate: true })}
+              options={[
+                { value: "", label: "Select bank" },
+                ...NIGERIAN_BANKS.map((bank) => ({ value: bank, label: bank })),
+              ]}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Account Name</label>
+            <Input
+              {...register("bankDetails.accountName")}
+              placeholder="Account holder name"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Account Number
+            </label>
+            <Input
+              {...register("bankDetails.accountNumber")}
+              placeholder="10-digit account number"
+              maxLength={10}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Operating Hours */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold border-b border-border pb-2">
+          Operating Hours
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Opening Time</label>
+            <Input
+              type="time"
+              {...register("operatingHours.openingTime" as any)}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Closing Time</label>
+            <Input
+              type="time"
+              {...register("operatingHours.closingTime" as any)}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Operating Days</label>
+          <div className="flex flex-wrap gap-2">
+            {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map(
+              (day) => (
+                <label
+                  key={day}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg border border-input hover:bg-muted cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    value={day}
+                    {...register("operatingHours.operatingDays" as any)}
+                    className="rounded border-input"
+                  />
+                  <span className="text-sm">{day.slice(0, 3)}</span>
+                </label>
+              )
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Categories */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold border-b border-border pb-2">
+          Product Categories
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Select the categories of products you sell
+        </p>
+
+        <div className="flex flex-wrap gap-2">
+          {[
+            "Electronics",
+            "Fashion",
+            "Phones",
+            "Computers",
+            "Accessories",
+            "Home & Garden",
+            "Health & Beauty",
+            "Sports",
+            "Food & Groceries",
+            "Baby & Kids",
+            "Automotive",
+            "Books",
+          ].map((category) => (
+            <label
+              key={category}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg border border-input hover:bg-muted cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                value={category}
+                {...register("categories")}
+                className="rounded border-input"
+              />
+              <span className="text-sm">{category}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Submit */}
+      <div className="pt-4 border-t border-border">
+        <Button type="submit" size="lg" isLoading={isLoading} className="w-full">
+          {initialData ? "Update Shop" : "Create Shop"}
+        </Button>
+      </div>
+    </form>
+  );
+}
