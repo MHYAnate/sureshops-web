@@ -43,5 +43,6 @@ export function useAuth(requireAuth: boolean = false) {
     logout,
     isVendor: user?.role === "vendor" || user?.role === "admin" || user?.role === "super_admin",
     isAdmin: user?.role === "admin" || user?.role === "super_admin",
+    isSuperAdmin: user?.role === "super_admin",
   };
 }

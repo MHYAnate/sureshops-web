@@ -7,6 +7,7 @@ import { Button } from "@/components/ui";
 interface BackButtonProps {
   href?: string;
   label?: string;
+  className?: string;
 }
 
 export function BackButton({ href, label = "Back" }: BackButtonProps) {

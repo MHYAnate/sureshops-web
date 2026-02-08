@@ -10,6 +10,7 @@ export interface User {
   vendorProfile?: string;
   createdAt: string;
   updatedAt: string;
+  isActive :boolean;
 }
 
 export interface AuthResponse {

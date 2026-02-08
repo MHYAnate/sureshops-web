@@ -1,0 +1,51 @@
+import { User, Vendor, Product } from './index';
+
+export interface DashboardStats {
+  users: {
+    total: number;
+    active: number;
+    newThisMonth: number;
+    byRole: { role: string; count: number }[];
+  };
+  vendors: {
+    total: number;
+    verified: number;
+    pending: number;
+    featured: number;
+    newThisMonth: number;
+  };
+  products: {
+    total: number;
+    approved: number;
+    pending: number;
+    rejected: number;
+    newThisMonth: number;
+  };
+  locations: {
+    states: number;
+    areas: number;
+    markets: number;
+  };
+  activity: {
+    totalViews: number;
+    totalSearches: number;
+  };
+}
+
+export interface RecentActivity {
+  type: string;
+  message: string;
+  timestamp: string;
+  data?: any;
+}
+
+export interface AdminFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  role?: string;
+  status?: string;
+  isActive?: boolean;
+  isVerified?: boolean;
+  isFeatured?: boolean;
+}
