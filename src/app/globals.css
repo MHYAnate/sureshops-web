@@ -1,8 +1,27 @@
 @import "tailwindcss";
 
-/* Custom Properties */
+@theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+}
+
+/* Your CSS variables */
 :root {
-  /* Premium Black & White Theme - Light Mode */
   --background: 0 0% 100%;
   --foreground: 0 0% 3.9%;
   --card: 0 0% 100%;
@@ -26,7 +45,6 @@
 }
 
 .dark {
-  /* Premium Black & White Theme - Dark Mode */
   --background: 0 0% 3.9%;
   --foreground: 0 0% 98%;
   --card: 0 0% 6%;
@@ -48,138 +66,30 @@
   --ring: 0 0% 83.1%;
 }
 
-/* Custom Base Styles */
-@layer base {
-  * {
-    border-color: hsl(var(--border));
-  }
-
-  body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: "rlig" 1, "calt" 1;
-  }
+/* Base styles */
+* {
+  border-color: var(--color-border);
 }
 
-/* Custom Components */
-@layer components {
-  /* Premium container */
-  .container-premium {
-    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
-  }
-
-  /* Glass effect - FIXED: No opacity modifier on custom color */
-  .glass {
-    background-color: hsl(var(--background) / 0.8);
-    backdrop-filter: blur(12px);
-  }
-
-  /* Premium card */
-  .card-premium {
-    @apply border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300;
-    background-color: hsl(var(--card));
-  }
-
-  /* Premium button */
-  .btn-premium {
-    @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring disabled:pointer-events-none disabled:opacity-50;
-  }
-
-  /* Text gradient */
-  .text-gradient {
-    background-image: linear-gradient(to right, hsl(var(--foreground)), hsl(var(--muted-foreground)));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  /* Shimmer effect - FIXED: Use direct properties */
-  .shimmer {
-    animation: shimmer 2s linear infinite;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.1),
-      transparent
-    );
-    background-size: 200% 100%;
-  }
-
-  /* Premium input */
-  .input-premium {
-    @apply w-full rounded-lg border px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50;
-    background-color: hsl(var(--background));
-    border-color: hsl(var(--input));
-  }
-
-  /* Line clamp utilities */
-  .line-clamp-1 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
-  }
-
-  .line-clamp-2 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-  }
-
-  .line-clamp-3 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-  }
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
 }
 
-/* Custom Utilities */
-@layer utilities {
-  /* Custom scrollbar */
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: hsl(var(--muted-foreground) / 0.2);
-    border-radius: 9999px;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background-color: hsl(var(--muted-foreground) / 0.4);
-  }
-
-  /* No scrollbar */
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Custom animations */
-  .animate-shimmer {
-    animation: shimmer 2s linear infinite;
-  }
+/* Custom classes */
+.glass {
+  background-color: hsl(var(--background) / 0.8);
+  backdrop-filter: blur(12px);
 }
 
-/* Keyframes */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+.card-premium {
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+}
+
+.text-gradient {
+  background: linear-gradient(to right, var(--color-foreground), var(--color-muted-foreground));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
