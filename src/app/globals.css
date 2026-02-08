@@ -70,19 +70,21 @@
     @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
   }
 
-  /* Glass effect */
+  /* Glass effect - FIXED: No opacity modifier on custom color */
   .glass {
-    @apply bg-background/80 backdrop-blur-xl;
+    background-color: hsl(var(--background) / 0.8);
+    backdrop-filter: blur(12px);
   }
 
   /* Premium card */
   .card-premium {
-    @apply bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300;
+    @apply border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300;
+    background-color: hsl(var(--card));
   }
 
   /* Premium button */
   .btn-premium {
-    @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring disabled:pointer-events-none disabled:opacity-50;
   }
 
   /* Text gradient */
@@ -93,9 +95,45 @@
     color: transparent;
   }
 
+  /* Shimmer effect - FIXED: Use direct properties */
+  .shimmer {
+    animation: shimmer 2s linear infinite;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    background-size: 200% 100%;
+  }
+
   /* Premium input */
   .input-premium {
-    @apply w-full rounded-lg border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50;
+    @apply w-full rounded-lg border px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50;
+    background-color: hsl(var(--background));
+    border-color: hsl(var(--input));
+  }
+
+  /* Line clamp utilities */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
   }
 }
 
@@ -120,28 +158,6 @@
     background-color: hsl(var(--muted-foreground) / 0.4);
   }
 
-  /* Line clamp utilities */
-  .line-clamp-1 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
-  }
-
-  .line-clamp-2 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-  }
-
-  .line-clamp-3 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-  }
-
   /* No scrollbar */
   .no-scrollbar {
     -ms-overflow-style: none;
@@ -150,5 +166,20 @@
   
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Custom animations */
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+  }
+}
+
+/* Keyframes */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
   }
 }
