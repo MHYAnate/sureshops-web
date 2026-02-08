@@ -1,11 +1,12 @@
+// shop-grid.tsx
 import { ShopCard } from "./shop-card";
-import { ShopSearchResult } from "@/types";
+import { ShopDisplayData } from "@/types/shop-display";
 import { Skeleton } from "@/components/ui";
 import { EmptyState } from "@/components/common";
 import { Store } from "lucide-react";
 
 interface ShopGridProps {
-  shops: ShopSearchResult[];
+  shops: ShopDisplayData[];  // ✅ Single unified type
   isLoading?: boolean;
   emptyMessage?: string;
 }

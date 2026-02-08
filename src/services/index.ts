@@ -4,3 +4,6 @@ export * from './product.service';
 export * from './vendor.service';
 export * from './location.service';
 export * from './upload.service';
+export * from './admin.service';
+export * from './favorites.service';
+export * from './reviews.service';

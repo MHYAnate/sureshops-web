@@ -7,3 +7,4 @@ export * from './empty-state';
 export * from './loading-state';
 export * from './back-button';
 export * from './pagination';
+export * from './image-upload';

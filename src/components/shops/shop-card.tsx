@@ -1,15 +1,16 @@
+// shop-card.tsx
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, Star, Package, Clock } from "lucide-react";
+import { MapPin, Star, Package } from "lucide-react";
 import { Card, Badge, Avatar } from "@/components/ui";
-import { VerifiedBadge, PriceTag } from "@/components/common";
-import { ShopSearchResult } from "@/types";
+import { VerifiedBadge } from "@/components/common";
+import { ShopDisplayData } from "@/types/shop-display";
 import { cn, formatPrice, isOpen as checkIsOpen } from "@/lib/utils";
 
 interface ShopCardProps {
-  shop: ShopSearchResult;
+  shop: ShopDisplayData;  // ✅ Single type, all optional fields handled
   className?: string;
 }
 
@@ -23,7 +24,7 @@ export function ShopCard({ shop, className }: ShopCardProps) {
       <Link href={`/shops/${shop.id}`}>
         {/* Cover Image */}
         <div className="relative h-32 bg-muted">
-          {shop.entrancePhoto ? (
+          {shop.entrancePhoto ? (                        
             <Image
               src={shop.entrancePhoto}
               alt={shop.businessName}
@@ -56,7 +57,7 @@ export function ShopCard({ shop, className }: ShopCardProps) {
           {/* Logo & Name */}
           <div className="flex items-start gap-3">
             <Avatar
-              src={shop.logo}
+              src={shop.logo}                             
               name={shop.businessName}
               size="lg"
               className="flex-shrink-0"
@@ -87,14 +88,16 @@ export function ShopCard({ shop, className }: ShopCardProps) {
             </p>
           )}
 
-          {/* Location */}
-          <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
-            <MapPin className="h-4 w-4" />
-            <span className="truncate">
-              {shop.location.shopNumber && `${shop.location.shopNumber}, `}
-              {shop.location.market?.name || shop.location.area.name}
-            </span>
-          </div>
+          {/* Location — ✅ all optional-chained */}
+          {shop.location && (
+            <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
+              <MapPin className="h-4 w-4" />
+              <span className="truncate">
+                {shop.location.shopNumber && `${shop.location.shopNumber}, `}
+                {shop.location.market?.name || shop.location.area?.name}
+              </span>
+            </div>
+          )}
 
           {/* Stats */}
           <div className="flex items-center gap-4 mt-3 text-sm">
@@ -102,7 +105,8 @@ export function ShopCard({ shop, className }: ShopCardProps) {
               <Package className="h-4 w-4" />
               <span>{shop.totalProducts} products</span>
             </div>
-            {shop.priceRange.min > 0 && (
+            {/* ✅ safe — priceRange is optional */}
+            {shop.priceRange && shop.priceRange.min > 0 && (
               <span className="text-muted-foreground">
                 {formatPrice(shop.priceRange.min)} - {formatPrice(shop.priceRange.max)}
               </span>
@@ -125,16 +129,13 @@ export function ShopCard({ shop, className }: ShopCardProps) {
             </div>
           )}
 
-          {/* Featured Products Preview */}
+          {/* Featured Products Preview — ✅ optional */}
           {shop.featuredProducts && shop.featuredProducts.length > 0 && (
             <div className="mt-4 pt-4 border-t border-border">
               <p className="text-xs text-muted-foreground mb-2">Top Products</p>
               <div className="flex gap-2 overflow-x-auto no-scrollbar">
                 {shop.featuredProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="flex-shrink-0 w-16 text-center"
-                  >
+                  <div key={product.id} className="flex-shrink-0 w-16 text-center">
                     <div className="relative h-16 w-16 rounded-lg bg-muted overflow-hidden">
                       {product.image ? (
                         <Image

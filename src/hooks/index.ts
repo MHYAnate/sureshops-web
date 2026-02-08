@@ -5,3 +5,4 @@ export * from './use-search';
 export * from './use-products';
 export * from './use-shops';
 export * from './use-media-query';
+export * from './use-favorites';

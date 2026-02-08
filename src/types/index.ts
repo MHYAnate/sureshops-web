@@ -4,3 +4,6 @@ export * from './vendor';
 export * from './search';
 export * from './location';
 export * from './api';
+export * from './favorites';
+export * from './reviews';
+export * from './admin';
