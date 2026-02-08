@@ -1,3 +1,4 @@
+// search-results.tsx
 "use client";
 
 import { useState } from "react";
@@ -7,6 +8,7 @@ import { ProductGrid, PriceComparison } from "@/components/products";
 import { ShopGrid } from "@/components/shops";
 import { EmptyState, LoadingState, Pagination } from "@/components/common";
 import { SearchResults as SearchResultsType, SearchType } from "@/types";
+import { searchResultToDisplayData } from "@/types/shop-display";  // ✅ Import converter
 import { cn } from "@/lib/utils";
 
 interface SearchResultsProps {
@@ -44,16 +46,20 @@ export function SearchResults({
 
   const hasProducts = results.products && results.products.items.length > 0;
   const hasShops = results.shops && results.shops.items.length > 0;
-  const hasComparison = results.productComparison && results.productComparison.items.length > 0;
+  const hasComparison =
+    results.productComparison && results.productComparison.items.length > 0;
 
   return (
     <div className="space-y-6">
       {/* Tabs & View Toggle */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        {/* Search Type Tabs */}
         <div className="flex items-center gap-2">
           <Button
-            variant={searchType === "all" || searchType === "products" ? "default" : "outline"}
+            variant={
+              searchType === "all" || searchType === "products"
+                ? "default"
+                : "outline"
+            }
             size="sm"
             onClick={() => onSearchTypeChange("products")}
           >
@@ -80,7 +86,6 @@ export function SearchResults({
           </Button>
         </div>
 
-        {/* View Mode Toggle (for products) */}
         {(searchType === "all" || searchType === "products") && hasProducts && (
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">View:</span>
@@ -110,10 +115,12 @@ export function SearchResults({
 
       {/* Results */}
       {searchType === "shops" ? (
-        // Shops Results
         hasShops ? (
           <>
-            <ShopGrid shops={results.shops!.items} />
+            {/* ✅ Convert ShopSearchResult[] → ShopDisplayData[] */}
+            <ShopGrid
+              shops={results.shops!.items.map(searchResultToDisplayData)}
+            />
             {results.shops!.totalPages > 1 && (
               <Pagination
                 currentPage={currentPage}
@@ -130,7 +137,6 @@ export function SearchResults({
           />
         )
       ) : (
-        // Products Results
         <>
           {viewMode === "grid" ? (
             hasProducts ? (
@@ -151,34 +157,30 @@ export function SearchResults({
                 description="Try adjusting your search or filters"
               />
             )
-          ) : (
-            // Price Comparison View
-            hasComparison ? (
-              <div className="space-y-8">
-                {results.productComparison!.items.map((product) => (
-                  <div key={product.id} className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-semibold">{product.name}</h3>
-                      <Badge variant="outline">
-                        {product.totalVendors} vendors
-                      </Badge>
-                    </div>
-                    <PriceComparison vendors={product.vendors} />
+          ) : hasComparison ? (
+            <div className="space-y-8">
+              {results.productComparison!.items.map((product) => (
+                <div key={product.id} className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">{product.name}</h3>
+                    <Badge variant="outline">
+                      {product.totalVendors} vendors
+                    </Badge>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <EmptyState
-                icon={<Package className="h-10 w-10" />}
-                title="No products to compare"
-                description="Try searching for a specific product"
-              />
-            )
+                  <PriceComparison vendors={product.vendors} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={<Package className="h-10 w-10" />}
+              title="No products to compare"
+              description="Try searching for a specific product"
+            />
           )}
         </>
       )}
 
-      {/* Search Meta */}
       {results.meta && (
         <p className="text-center text-sm text-muted-foreground">
           Found in {results.meta.took}ms
