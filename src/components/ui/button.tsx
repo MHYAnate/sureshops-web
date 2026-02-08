@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Slot } from "@radix-ui/react-slot"; // Import Slot
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { Spinner } from "./spinner";
@@ -36,25 +37,39 @@ export interface ButtonProps
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  asChild?: boolean; // Added this property
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, isLoading, leftIcon, rightIcon, children, disabled, ...props }, ref) => {
+  ({ className, variant, size, isLoading, leftIcon, rightIcon, children, disabled, asChild = false, ...props }, ref) => {
+    // If asChild is true, use Slot, otherwise use button
+    const Comp = asChild ? Slot : "button";
+
     return (
-      <button
+      <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         disabled={disabled || isLoading}
         {...props}
       >
-        {isLoading ? (
-          <Spinner className="mr-2 h-4 w-4" />
-        ) : leftIcon ? (
-          <span className="mr-2">{leftIcon}</span>
-        ) : null}
-        {children}
-        {rightIcon && !isLoading && <span className="ml-2">{rightIcon}</span>}
-      </button>
+        {/* Note: When using asChild, Slot expects a SINGLE child. 
+          If you use asChild with Link, you should handle icons inside the Link.
+          The logic below handles both standard and asChild scenarios.
+        */}
+        {asChild ? (
+          children
+        ) : (
+          <>
+            {isLoading ? (
+              <Spinner className="mr-2 h-4 w-4" />
+            ) : leftIcon ? (
+              <span className="mr-2">{leftIcon}</span>
+            ) : null}
+            {children}
+            {rightIcon && !isLoading && <span className="ml-2">{rightIcon}</span>}
+          </>
+        )}
+      </Comp>
     );
   }
 );
