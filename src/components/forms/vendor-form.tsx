@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Input, Select } from "@/components/ui";
-// import { ImageUpload } from "@/components/common/image-upload";
 import { useLocation } from "@/hooks";
 import { vendorSchema, VendorInput } from "@/lib/validations";
 import { VENDOR_TYPES, NIGERIAN_BANKS } from "@/lib/constants";
@@ -21,6 +20,7 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
     areas,
     markets,
     selectedState,
+    selectedArea,
     setSelectedState,
     setSelectedArea,
     setSelectedMarket,
@@ -32,6 +32,7 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
     formState: { errors },
     setValue,
     watch,
+    reset,
   } = useForm<VendorInput>({
     resolver: zodResolver(vendorSchema),
     defaultValues: initialData || {
@@ -42,25 +43,57 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
     },
   });
 
+  // Watch values for rendering
+  const stateId = watch("stateId");
+  const areaId = watch("areaId");
+  const marketId = watch("marketId");
+  const vendorType = watch("vendorType");
+
+  // Sync initialData with location state on mount/edit
+  useEffect(() => {
+    if (initialData?.stateId) {
+      const state = states.find((s) => s.id === initialData.stateId);
+      if (state) setSelectedState(state);
+    }
+    if (initialData?.areaId) {
+      const area = areas.find((a) => a.id === initialData.areaId);
+      if (area) setSelectedArea(area);
+    }
+    if (initialData?.marketId) {
+      const market = markets.find((m) => m.id === initialData.marketId);
+      if (market) setSelectedMarket(market);
+    }
+  }, [initialData, states, areas, markets, setSelectedState, setSelectedArea, setSelectedMarket]);
+
+  // Reset form when initialData changes (for edit mode)
+  useEffect(() => {
+    if (initialData) {
+      reset(initialData);
+    }
+  }, [initialData, reset]);
+
   const handleStateChange = (stateId: string) => {
     const state = states.find((s) => s.id === stateId);
     setSelectedState(state || null);
-    setValue("stateId", stateId);
-    setValue("areaId", "");
-    setValue("marketId", undefined);
+    setValue("stateId", stateId, { shouldValidate: true });
+    setValue("areaId", "", { shouldValidate: true });
+    setValue("marketId", undefined, { shouldValidate: true });
+    setSelectedArea(null);
+    setSelectedMarket(null);
   };
 
   const handleAreaChange = (areaId: string) => {
     const area = areas.find((a) => a.id === areaId);
     setSelectedArea(area || null);
-    setValue("areaId", areaId);
-    setValue("marketId", undefined);
+    setValue("areaId", areaId, { shouldValidate: true });
+    setValue("marketId", undefined, { shouldValidate: true });
+    setSelectedMarket(null);
   };
 
   const handleMarketChange = (marketId: string) => {
     const market = markets.find((m) => m.id === marketId);
     setSelectedMarket(market || null);
-    setValue("marketId", marketId || undefined);
+    setValue("marketId", marketId || undefined, { shouldValidate: true });
   };
 
   return (
@@ -96,8 +129,8 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
             Vendor Type <span className="text-destructive">*</span>
           </label>
           <Select
-            value={watch("vendorType")}
-            onChange={(value) => setValue("vendorType", value as any)}
+            value={vendorType}
+            onChange={(value) => setValue("vendorType", value as any, { shouldValidate: true })}
             options={VENDOR_TYPES}
           />
           <p className="text-xs text-muted-foreground mt-1">
@@ -118,7 +151,8 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
               State <span className="text-destructive">*</span>
             </label>
             <Select
-              value={watch("stateId") || ""}
+              key={`state-${states.length}`} // Force re-render if states change
+              value={stateId || ""}
               onChange={handleStateChange}
               options={states.map((s) => ({ value: s.id, label: s.name }))}
               placeholder="Select state"
@@ -131,11 +165,12 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
               Area <span className="text-destructive">*</span>
             </label>
             <Select
-              value={watch("areaId") || ""}
+              key={`area-${selectedState?.id || 'none'}-${areas.length}`} // Re-render when state changes
+              value={areaId || ""}
               onChange={handleAreaChange}
               options={areas.map((a) => ({ value: a.id, label: a.name }))}
-              placeholder="Select area"
-              disabled={!selectedState}
+              placeholder={selectedState ? "Select area" : "Select state first"}
+              disabled={!selectedState || areas.length === 0}
               error={errors.areaId?.message}
             />
           </div>
@@ -143,13 +178,15 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
           <div>
             <label className="block text-sm font-medium mb-2">Market / Mall</label>
             <Select
-              value={watch("marketId") || ""}
+              key={`market-${selectedArea?.id || 'none'}-${markets.length}`} // Re-render when area changes
+              value={marketId || ""}
               onChange={handleMarketChange}
               options={[
                 { value: "", label: "None (Home-based / Street)" },
                 ...markets.map((m) => ({ value: m.id, label: m.name })),
               ]}
-              disabled={!watch("areaId")}
+              placeholder={selectedArea ? "Select market" : "Select area first"}
+              disabled={!selectedArea || markets.length === 0}
             />
           </div>
         </div>
@@ -274,7 +311,7 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
             <label className="block text-sm font-medium mb-2">Bank Name</label>
             <Select
               value={watch("bankDetails.bankName") || ""}
-              onChange={(value) => setValue("bankDetails.bankName", value)}
+              onChange={(value) => setValue("bankDetails.bankName", value, { shouldValidate: true })}
               options={[
                 { value: "", label: "Select bank" },
                 ...NIGERIAN_BANKS.map((bank) => ({ value: bank, label: bank })),
