@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   images: {
     remotePatterns: [
       {
@@ -22,6 +21,16 @@ const nextConfig = {
       },
     ];
   },
+  experimental: {
+    turbo: {
+      rules: {
+        '*.css': {
+          loaders: ['postcss'],
+          as: 'style'
+        }
+      }
+    }
+  }
 };
 
 module.exports = nextConfig;
