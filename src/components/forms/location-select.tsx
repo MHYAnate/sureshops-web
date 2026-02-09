@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { Select } from "@/components/ui";
 import { useLocationSelect } from "@/hooks/use-location-select";
 
@@ -53,35 +52,9 @@ export function LocationSelect({
     includeMarkets: includeMarkets && showMarket,
   });
 
-  // Track previous values to avoid duplicate callbacks
-  const prevStateId = useRef(initialStateId || "");
-  const prevAreaId = useRef(initialAreaId || "");
-  const prevMarketId = useRef(initialMarketId || "");
-
-  // Sync selected values back to parent form via callbacks
-  useEffect(() => {
-    if (selectedStateId !== prevStateId.current) {
-      prevStateId.current = selectedStateId;
-      onStateChange?.(selectedStateId);
-    }
-  }, [selectedStateId, onStateChange]);
-
-  useEffect(() => {
-    if (selectedAreaId !== prevAreaId.current) {
-      prevAreaId.current = selectedAreaId;
-      onAreaChange?.(selectedAreaId);
-    }
-  }, [selectedAreaId, onAreaChange]);
-
-  useEffect(() => {
-    if (selectedMarketId !== prevMarketId.current) {
-      prevMarketId.current = selectedMarketId;
-      onMarketChange?.(selectedMarketId);
-    }
-  }, [selectedMarketId, onMarketChange]);
-
   const handleStateSelect = (stateId: string) => {
     internalStateChange(stateId);
+    // Notify parent form
     onStateChange?.(stateId);
     onAreaChange?.("");
     onMarketChange?.("");
@@ -89,12 +62,14 @@ export function LocationSelect({
 
   const handleAreaSelect = (areaId: string) => {
     internalAreaChange(areaId);
+    // Notify parent form
     onAreaChange?.(areaId);
     onMarketChange?.("");
   };
 
   const handleMarketSelect = (marketId: string) => {
     internalMarketChange(marketId);
+    // Notify parent form
     onMarketChange?.(marketId);
   };
 
@@ -136,6 +111,12 @@ export function LocationSelect({
           disabled={disabled || !selectedStateId || loadingAreas || areas.length === 0}
           error={areaError}
         />
+        {/* Debug info — remove after confirming it works */}
+        {selectedStateId && !loadingAreas && (
+          <p className="text-xs text-muted-foreground mt-1">
+            {areas.length} area{areas.length !== 1 ? "s" : ""} found
+          </p>
+        )}
       </div>
 
       {/* Market Select (optional) */}

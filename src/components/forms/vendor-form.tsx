@@ -1,31 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Input, Select } from "@/components/ui";
-import { useLocation } from "@/hooks";
+import { LocationSelect } from "@/components/forms/location-select";
 import { vendorSchema, VendorInput } from "@/lib/validations";
 import { VENDOR_TYPES, NIGERIAN_BANKS } from "@/lib/constants";
 
 interface VendorFormProps {
   initialData?: Partial<VendorInput>;
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: VendorInput) => Promise<void>;
   isLoading?: boolean;
 }
 
 export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps) {
-  const {
-    states,
-    areas,
-    markets,
-    selectedState,
-    selectedArea,
-    setSelectedState,
-    setSelectedArea,
-    setSelectedMarket,
-  } = useLocation();
-
   const {
     register,
     handleSubmit,
@@ -35,70 +24,115 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
     reset,
   } = useForm<VendorInput>({
     resolver: zodResolver(vendorSchema),
-    defaultValues: initialData || {
+    defaultValues: {
+      businessName: "",
+      businessDescription: "",
       vendorType: "market_shop",
-      contactDetails: { phone: "" },
-      bankDetails: {},
+      stateId: "",
+      areaId: "",
+      marketId: "",
+      shopNumber: "",
+      shopFloor: "",
+      shopBlock: "",
+      shopAddress: "",
+      landmark: "",
+      contactDetails: {
+        phone: "",
+        alternatePhone: "",
+        whatsapp: "",
+        email: "",
+        instagram: "",
+        facebook: "",
+        twitter: "",
+        website: "",
+      },
+      bankDetails: {
+        bankName: "",
+        accountName: "",
+        accountNumber: "",
+        bankCode: "",
+      },
+      operatingHours: {
+        openingTime: "",
+        closingTime: "",
+        operatingDays: [],
+      },
       categories: [],
+      tags: [],
+      ...initialData,
     },
   });
 
-  // Watch values for rendering
-  const stateId = watch("stateId");
-  const areaId = watch("areaId");
-  const marketId = watch("marketId");
   const vendorType = watch("vendorType");
 
-  // Sync initialData with location state on mount/edit
-  useEffect(() => {
-    if (initialData?.stateId) {
-      const state = states.find((s) => s.id === initialData.stateId);
-      if (state) setSelectedState(state);
-    }
-    if (initialData?.areaId) {
-      const area = areas.find((a) => a.id === initialData.areaId);
-      if (area) setSelectedArea(area);
-    }
-    if (initialData?.marketId) {
-      const market = markets.find((m) => m.id === initialData.marketId);
-      if (market) setSelectedMarket(market);
-    }
-  }, [initialData, states, areas, markets, setSelectedState, setSelectedArea, setSelectedMarket]);
-
-  // Reset form when initialData changes (for edit mode)
+  // Reset form when initialData changes (edit mode)
   useEffect(() => {
     if (initialData) {
-      reset(initialData);
+      reset({
+        businessName: "",
+        businessDescription: "",
+        vendorType: "market_shop",
+        stateId: "",
+        areaId: "",
+        marketId: "",
+        shopNumber: "",
+        shopFloor: "",
+        shopBlock: "",
+        shopAddress: "",
+        landmark: "",
+        contactDetails: {
+          phone: "",
+          alternatePhone: "",
+          whatsapp: "",
+          email: "",
+          instagram: "",
+          facebook: "",
+          twitter: "",
+          website: "",
+        },
+        bankDetails: {
+          bankName: "",
+          accountName: "",
+          accountNumber: "",
+          bankCode: "",
+        },
+        operatingHours: {
+          openingTime: "",
+          closingTime: "",
+          operatingDays: [],
+        },
+        categories: [],
+        tags: [],
+        ...initialData,
+      });
     }
   }, [initialData, reset]);
 
-  const handleStateChange = (stateId: string) => {
-    const state = states.find((s) => s.id === stateId);
-    setSelectedState(state || null);
-    setValue("stateId", stateId, { shouldValidate: true });
-    setValue("areaId", "", { shouldValidate: true });
-    setValue("marketId", undefined, { shouldValidate: true });
-    setSelectedArea(null);
-    setSelectedMarket(null);
-  };
+  // ✅ Stable callbacks — won't cause LocationSelect re-renders
+  const handleLocationStateChange = useCallback(
+    (stateId: string) => {
+      setValue("stateId", stateId, { shouldValidate: true });
+    },
+    [setValue]
+  );
 
-  const handleAreaChange = (areaId: string) => {
-    const area = areas.find((a) => a.id === areaId);
-    setSelectedArea(area || null);
-    setValue("areaId", areaId, { shouldValidate: true });
-    setValue("marketId", undefined, { shouldValidate: true });
-    setSelectedMarket(null);
-  };
+  const handleLocationAreaChange = useCallback(
+    (areaId: string) => {
+      setValue("areaId", areaId, { shouldValidate: true });
+    },
+    [setValue]
+  );
 
-  const handleMarketChange = (marketId: string) => {
-    const market = markets.find((m) => m.id === marketId);
-    setSelectedMarket(market || null);
-    setValue("marketId", marketId || undefined, { shouldValidate: true });
-  };
+  const handleLocationMarketChange = useCallback(
+    (marketId: string) => {
+      setValue("marketId", marketId || undefined, { shouldValidate: true });
+    },
+    [setValue]
+  );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-      {/* Business Info */}
+      {/* ===== Business Info ===== */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold border-b border-border pb-2">
           Business Information
@@ -130,7 +164,9 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
           </label>
           <Select
             value={vendorType}
-            onChange={(value) => setValue("vendorType", value as any, { shouldValidate: true })}
+            onChange={(value) =>
+              setValue("vendorType", value as any, { shouldValidate: true })
+            }
             options={VENDOR_TYPES}
           />
           <p className="text-xs text-muted-foreground mt-1">
@@ -139,61 +175,28 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
         </div>
       </div>
 
-      {/* Location */}
+      {/* ===== Location ===== */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold border-b border-border pb-2">
           Location
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              State <span className="text-destructive">*</span>
-            </label>
-            <Select
-              key={`state-${states.length}`} // Force re-render if states change
-              value={stateId || ""}
-              onChange={handleStateChange}
-              options={states.map((s) => ({ value: s.id, label: s.name }))}
-              placeholder="Select state"
-              error={errors.stateId?.message}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Area <span className="text-destructive">*</span>
-            </label>
-            <Select
-              key={`area-${selectedState?.id || 'none'}-${areas.length}`} // Re-render when state changes
-              value={areaId || ""}
-              onChange={handleAreaChange}
-              options={areas.map((a) => ({ value: a.id, label: a.name }))}
-              placeholder={selectedState ? "Select area" : "Select state first"}
-              disabled={!selectedState || areas.length === 0}
-              error={errors.areaId?.message}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Market / Mall</label>
-            <Select
-              key={`market-${selectedArea?.id || 'none'}-${markets.length}`} // Re-render when area changes
-              value={marketId || ""}
-              onChange={handleMarketChange}
-              options={[
-                { value: "", label: "None (Home-based / Street)" },
-                ...markets.map((m) => ({ value: m.id, label: m.name })),
-              ]}
-              placeholder={selectedArea ? "Select market" : "Select area first"}
-              disabled={!selectedArea || markets.length === 0}
-            />
-          </div>
-        </div>
+        <LocationSelect
+          initialStateId={initialData?.stateId}
+          initialAreaId={initialData?.areaId}
+          initialMarketId={initialData?.marketId}
+          onStateChange={handleLocationStateChange}
+          onAreaChange={handleLocationAreaChange}
+          onMarketChange={handleLocationMarketChange}
+          stateError={errors.stateId?.message}
+          areaError={errors.areaId?.message}
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Shop Number</label>
+            <label className="block text-sm font-medium mb-2">
+              Shop Number
+            </label>
             <Input
               {...register("shopNumber")}
               placeholder="e.g., Shop 45, Stall 12"
@@ -203,7 +206,7 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
           <div>
             <label className="block text-sm font-medium mb-2">Floor</label>
             <Input
-              {...register("shopFloor" as any)}
+              {...register("shopFloor")}
               placeholder="e.g., Ground Floor, 2nd Floor"
             />
           </div>
@@ -211,7 +214,7 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
           <div>
             <label className="block text-sm font-medium mb-2">Block</label>
             <Input
-              {...register("shopBlock" as any)}
+              {...register("shopBlock")}
               placeholder="e.g., Block A, Plaza B"
             />
           </div>
@@ -228,13 +231,13 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
         <div>
           <label className="block text-sm font-medium mb-2">Landmark</label>
           <Input
-            {...register("landmark" as any)}
+            {...register("landmark")}
             placeholder="Nearby landmark for easy location"
           />
         </div>
       </div>
 
-      {/* Contact Details */}
+      {/* ===== Contact Details ===== */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold border-b border-border pb-2">
           Contact Information
@@ -274,7 +277,7 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
           <div>
             <label className="block text-sm font-medium mb-2">Website</label>
             <Input
-              {...register("contactDetails.website" as any)}
+              {...register("contactDetails.website")}
               placeholder="https://yourwebsite.com"
             />
           </div>
@@ -282,7 +285,7 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
           <div>
             <label className="block text-sm font-medium mb-2">Instagram</label>
             <Input
-              {...register("contactDetails.instagram" as any)}
+              {...register("contactDetails.instagram")}
               placeholder="@yourusername"
             />
           </div>
@@ -290,14 +293,14 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
           <div>
             <label className="block text-sm font-medium mb-2">Facebook</label>
             <Input
-              {...register("contactDetails.facebook" as any)}
+              {...register("contactDetails.facebook")}
               placeholder="facebook.com/yourpage"
             />
           </div>
         </div>
       </div>
 
-      {/* Bank Details */}
+      {/* ===== Bank Details ===== */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold border-b border-border pb-2">
           Bank Details
@@ -311,16 +314,25 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
             <label className="block text-sm font-medium mb-2">Bank Name</label>
             <Select
               value={watch("bankDetails.bankName") || ""}
-              onChange={(value) => setValue("bankDetails.bankName", value, { shouldValidate: true })}
+              onChange={(value) =>
+                setValue("bankDetails.bankName", value, {
+                  shouldValidate: true,
+                })
+              }
               options={[
                 { value: "", label: "Select bank" },
-                ...NIGERIAN_BANKS.map((bank) => ({ value: bank, label: bank })),
+                ...NIGERIAN_BANKS.map((bank) => ({
+                  value: bank,
+                  label: bank,
+                })),
               ]}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Account Name</label>
+            <label className="block text-sm font-medium mb-2">
+              Account Name
+            </label>
             <Input
               {...register("bankDetails.accountName")}
               placeholder="Account holder name"
@@ -340,7 +352,7 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
         </div>
       </div>
 
-      {/* Operating Hours */}
+      {/* ===== Operating Hours ===== */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold border-b border-border pb-2">
           Operating Hours
@@ -348,46 +360,58 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Opening Time</label>
+            <label className="block text-sm font-medium mb-2">
+              Opening Time
+            </label>
             <Input
               type="time"
-              {...register("operatingHours.openingTime" as any)}
+              {...register("operatingHours.openingTime")}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Closing Time</label>
+            <label className="block text-sm font-medium mb-2">
+              Closing Time
+            </label>
             <Input
               type="time"
-              {...register("operatingHours.closingTime" as any)}
+              {...register("operatingHours.closingTime")}
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Operating Days</label>
+          <label className="block text-sm font-medium mb-2">
+            Operating Days
+          </label>
           <div className="flex flex-wrap gap-2">
-            {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map(
-              (day) => (
-                <label
-                  key={day}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg border border-input hover:bg-muted cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    value={day}
-                    {...register("operatingHours.operatingDays" as any)}
-                    className="rounded border-input"
-                  />
-                  <span className="text-sm">{day.slice(0, 3)}</span>
-                </label>
-              )
-            )}
+            {[
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday",
+            ].map((day) => (
+              <label
+                key={day}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg border border-input hover:bg-muted cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  value={day}
+                  {...register("operatingHours.operatingDays")}
+                  className="rounded border-input"
+                />
+                <span className="text-sm">{day.slice(0, 3)}</span>
+              </label>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Categories */}
+      {/* ===== Categories ===== */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold border-b border-border pb-2">
           Product Categories
@@ -427,9 +451,14 @@ export function VendorForm({ initialData, onSubmit, isLoading }: VendorFormProps
         </div>
       </div>
 
-      {/* Submit */}
+      {/* ===== Submit ===== */}
       <div className="pt-4 border-t border-border">
-        <Button type="submit" size="lg" isLoading={isLoading} className="w-full">
+        <Button
+          type="submit"
+          size="lg"
+          isLoading={isLoading}
+          className="w-full"
+        >
           {initialData ? "Update Shop" : "Create Shop"}
         </Button>
       </div>

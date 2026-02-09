@@ -49,10 +49,9 @@ export function useLocationSelect(
   const [loadingAreas, setLoadingAreas] = useState(false);
   const [loadingMarkets, setLoadingMarkets] = useState(false);
 
-  // Track whether we are doing initial hydration vs user interaction
-  const isInitialHydration = useRef(true);
-  const hasFetchedAreas = useRef(false);
-  const hasFetchedMarkets = useRef(false);
+  // Track whether user triggered the change vs initial load
+  const userChangedState = useRef(false);
+  const userChangedArea = useRef(false);
 
   // 1. Fetch states on mount
   useEffect(() => {
@@ -64,6 +63,10 @@ export function useLocationSelect(
         const data = await locationService.getStates();
         if (!cancelled) {
           setStates(data);
+          // If we have an initial state, make sure it's set
+          if (initialStateId) {
+            setSelectedStateId(initialStateId);
+          }
         }
       } catch (error) {
         console.error("Failed to fetch states:", error);
@@ -77,7 +80,7 @@ export function useLocationSelect(
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, []); // Only run once on mount
 
   // 2. Fetch areas when selectedStateId changes
   useEffect(() => {
@@ -86,29 +89,32 @@ export function useLocationSelect(
     if (!selectedStateId) {
       setAreas([]);
       setMarkets([]);
-      // Don't clear selectedAreaId during initial hydration
-      if (!isInitialHydration.current) {
-        setSelectedAreaId("");
-        setSelectedMarketId("");
-      }
+      setSelectedAreaId("");
+      setSelectedMarketId("");
       return;
     }
 
     const fetchAreas = async () => {
       setLoadingAreas(true);
+
+      // Only clear selections if USER changed the state (not initial load)
+      if (userChangedState.current) {
+        setSelectedAreaId("");
+        setSelectedMarketId("");
+        setMarkets([]);
+        userChangedState.current = false;
+      }
+
       try {
         const data = await locationService.getAreasByState(selectedStateId);
         if (!cancelled) {
           setAreas(data);
-          hasFetchedAreas.current = true;
 
-          // During initial hydration, check if initialAreaId exists in fetched areas
-          if (isInitialHydration.current && initialAreaId) {
+          // If we have an initial area and it exists in the fetched data, select it
+          if (initialAreaId && !userChangedState.current) {
             const areaExists = data.find((a) => a.id === initialAreaId);
             if (areaExists) {
               setSelectedAreaId(initialAreaId);
-            } else {
-              setSelectedAreaId("");
             }
           }
         }
@@ -127,7 +133,7 @@ export function useLocationSelect(
     return () => {
       cancelled = true;
     };
-  }, [selectedStateId, initialAreaId]);
+  }, [selectedStateId]); // Only depend on selectedStateId
 
   // 3. Fetch markets when selectedAreaId changes
   useEffect(() => {
@@ -135,27 +141,31 @@ export function useLocationSelect(
 
     if (!selectedAreaId || !includeMarkets) {
       setMarkets([]);
-      if (!isInitialHydration.current) {
+      if (userChangedArea.current) {
         setSelectedMarketId("");
+        userChangedArea.current = false;
       }
       return;
     }
 
     const fetchMarkets = async () => {
       setLoadingMarkets(true);
+
+      if (userChangedArea.current) {
+        setSelectedMarketId("");
+        userChangedArea.current = false;
+      }
+
       try {
         const data = await locationService.getMarketsByArea(selectedAreaId);
         if (!cancelled) {
           setMarkets(data);
-          hasFetchedMarkets.current = true;
 
-          // During initial hydration, check if initialMarketId exists
-          if (isInitialHydration.current && initialMarketId) {
+          // If we have an initial market and it exists, select it
+          if (initialMarketId && !userChangedArea.current) {
             const marketExists = data.find((m) => m.id === initialMarketId);
             if (marketExists) {
               setSelectedMarketId(initialMarketId);
-            } else {
-              setSelectedMarketId("");
             }
           }
         }
@@ -172,59 +182,24 @@ export function useLocationSelect(
     return () => {
       cancelled = true;
     };
-  }, [selectedAreaId, includeMarkets, initialMarketId]);
-
-  // 4. Set initial state once states are loaded
-  useEffect(() => {
-    if (states.length > 0 && initialStateId && isInitialHydration.current) {
-      const stateExists = states.find((s) => s.id === initialStateId);
-      if (stateExists) {
-        setSelectedStateId(initialStateId);
-      }
-    }
-  }, [states, initialStateId]);
-
-  // 5. Mark initial hydration complete after all initial data is loaded
-  useEffect(() => {
-    if (!isInitialHydration.current) return;
-
-    const statesLoaded = states.length > 0;
-    const areasResolved = !initialStateId || hasFetchedAreas.current;
-    const marketsResolved =
-      !initialAreaId || !includeMarkets || hasFetchedMarkets.current;
-
-    if (statesLoaded && areasResolved && marketsResolved) {
-      // Use timeout to ensure all state updates from hydration have settled
-      const timer = setTimeout(() => {
-        isInitialHydration.current = false;
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [states, areas, markets, initialStateId, initialAreaId, includeMarkets]);
+  }, [selectedAreaId, includeMarkets]); // Only depend on selectedAreaId
 
   const handleStateChange = useCallback((stateId: string) => {
-    isInitialHydration.current = false;
+    userChangedState.current = true;
     setSelectedStateId(stateId);
-    setSelectedAreaId("");
-    setSelectedMarketId("");
-    setAreas([]);
-    setMarkets([]);
   }, []);
 
   const handleAreaChange = useCallback((areaId: string) => {
-    isInitialHydration.current = false;
+    userChangedArea.current = true;
     setSelectedAreaId(areaId);
-    setSelectedMarketId("");
-    setMarkets([]);
   }, []);
 
   const handleMarketChange = useCallback((marketId: string) => {
-    isInitialHydration.current = false;
     setSelectedMarketId(marketId);
   }, []);
 
   const reset = useCallback(() => {
-    isInitialHydration.current = false;
+    userChangedState.current = true;
     setSelectedStateId("");
     setSelectedAreaId("");
     setSelectedMarketId("");
