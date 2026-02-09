@@ -89,7 +89,7 @@ export function ShopCard({ shop, className }: ShopCardProps) {
           )}
 
           {/* Location — ✅ all optional-chained */}
-          {shop.location && (
+          {/* {shop.location && (
             <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
               <MapPin className="h-4 w-4" />
               <span className="truncate">
@@ -97,7 +97,17 @@ export function ShopCard({ shop, className }: ShopCardProps) {
                 {shop.location.market?.name || shop.location.area?.name}
               </span>
             </div>
-          )}
+          )} */}
+          {shop.location && (
+  <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
+    <MapPin className="h-4 w-4" />
+    <span className="truncate">
+      {shop.location.shopNumber && `${shop.location.shopNumber}, `}
+      {shop.location.market?.name || shop.location.area?.name || ""}
+      {shop.location.state?.name && `, ${shop.location.state.name}`}
+    </span>
+  </div>
+)}
 
           {/* Stats */}
           <div className="flex items-center gap-4 mt-3 text-sm">

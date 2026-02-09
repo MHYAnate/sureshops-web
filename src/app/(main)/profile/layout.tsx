@@ -1,11 +1,14 @@
+// src/app/(main)/profile/layout.tsx
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User, Heart, Settings, Package } from "lucide-react";
+import { User, Heart, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks";
 import { LoadingState } from "@/components/common";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const profileNav = [
   { href: "/profile", icon: User, label: "Profile" },
@@ -19,10 +22,21 @@ export default function ProfileLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { isLoading, isAuthenticated } = useAuth(true);
 
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isLoading, isAuthenticated, router]);
+
   if (isLoading) {
-    return <LoadingState />;
+    return (
+      <div className="container-premium py-6">
+        <LoadingState />
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
@@ -32,7 +46,6 @@ export default function ProfileLayout({
   return (
     <div className="container-premium py-6">
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Sidebar */}
         <aside className="w-full md:w-64 flex-shrink-0">
           <nav className="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible no-scrollbar">
             {profileNav.map((item) => {
@@ -56,8 +69,6 @@ export default function ProfileLayout({
             })}
           </nav>
         </aside>
-
-        {/* Content */}
         <main className="flex-1 min-w-0">{children}</main>
       </div>
     </div>

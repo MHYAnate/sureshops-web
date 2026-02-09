@@ -1,7 +1,14 @@
-// src/app/(main)/page.tsx
+// src/app/(main)/home/page.tsx
 import { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, MapPin, Store, TrendingUp, Shield, Search } from "lucide-react";
+import {
+  ArrowRight,
+  MapPin,
+  Store,
+  TrendingUp,
+  Shield,
+  Search,
+} from "lucide-react";
 import { Button, Card } from "@/components/ui";
 import { HomeSearch } from "@/components/search/home-search";
 import { CATEGORIES } from "@/lib/constants";
@@ -13,7 +20,7 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <div>
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="relative bg-gradient-to-b from-muted/50 to-background pt-12 pb-20">
         <div className="container-premium">
           <div className="max-w-3xl mx-auto text-center">
@@ -22,17 +29,15 @@ export default function HomePage() {
               <span className="text-muted-foreground">Compare Prices.</span>
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Set your location, search for any product, and instantly see every
-              shop in the market that has it — with prices, shop numbers, and
-              directions.
+              Standing in the parking lot? Set your market location, search for
+              any product, and instantly see every shop that has it — with
+              prices, shop numbers, and directions.
             </p>
 
-            {/* Location-First Search */}
             <div className="mt-10 max-w-2xl mx-auto">
               <HomeSearch />
             </div>
 
-            {/* Quick Links */}
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               {["iPhone", "Laptop", "Shoes", "Electronics", "Fashion"].map(
                 (term) => (
@@ -50,7 +55,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* How It Works */}
+      {/* How it works */}
       <section className="py-16">
         <div className="container-premium">
           <h2 className="text-2xl font-bold text-center mb-10">
@@ -62,25 +67,25 @@ export default function HomePage() {
                 step: "1",
                 icon: <MapPin className="h-6 w-6" />,
                 title: "Select Your Market",
-                desc: "Choose your state, area, and the market you're visiting",
+                desc: "Choose your state, area, and the specific market you are visiting or near",
               },
               {
                 step: "2",
                 icon: <Search className="h-6 w-6" />,
                 title: "Search a Product",
-                desc: "Type the product you're looking for",
+                desc: "Type the product you are looking for — phones, shoes, laptops, anything",
               },
               {
                 step: "3",
                 icon: <TrendingUp className="h-6 w-6" />,
                 title: "Compare Prices",
-                desc: "See all shops with that product and their prices",
+                desc: "See all shops that carry that product with their prices side by side",
               },
               {
                 step: "4",
                 icon: <Store className="h-6 w-6" />,
                 title: "Visit the Shop",
-                desc: "Get the shop number, floor, and directions",
+                desc: "Get the exact shop number, floor, block, and call the vendor directly",
               },
             ].map((item) => (
               <Card key={item.step} className="p-6 text-center relative">

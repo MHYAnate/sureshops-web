@@ -1,41 +1,41 @@
-// src/app/(admin)/admin/layout.tsx
+// src/app/(vendor)/vendor/layout.tsx
 "use client";
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks";
-import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { VendorSidebar } from "@/components/layout";
 import { LoadingState } from "@/components/common";
 
-export default function AdminLayout({
+export default function VendorLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { isLoading, isAuthenticated, isAdmin } = useAuth(true);
+  const { isLoading, isAuthenticated, isVendor } = useAuth(true);
 
   useEffect(() => {
-    if (!isLoading && (!isAuthenticated || !isAdmin)) {
+    if (!isLoading && !isAuthenticated) {
       router.push("/login");
     }
-  }, [isLoading, isAuthenticated, isAdmin, router]);
+  }, [isLoading, isAuthenticated, router]);
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <LoadingState text="Loading admin panel..." />
+        <LoadingState text="Loading vendor panel..." />
       </div>
     );
   }
 
-  if (!isAuthenticated || !isAdmin) {
+  if (!isAuthenticated) {
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <AdminSidebar />
+    <div className="min-h-screen">
+      <VendorSidebar />
       <main className="lg:pl-64">
         <div className="container-premium py-8">{children}</div>
       </main>

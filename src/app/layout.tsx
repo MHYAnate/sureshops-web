@@ -1,9 +1,8 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
-import { Header, Footer, MobileNav } from "@/components/layout";
-
 
 const inter = Inter({
   subsets: ["latin"],
@@ -15,8 +14,16 @@ export const metadata: Metadata = {
     default: "SureShops - Find Products, Compare Prices",
     template: "%s | SureShops",
   },
-  description: "Discover products from local shops across Nigeria. Compare prices, find deals, and support local businesses.",
-  keywords: ["marketplace", "shopping", "Nigeria", "local shops", "price comparison"],
+  description:
+    "Discover products from local shops across Nigeria. Compare prices, find deals, and support local businesses.",
+  keywords: [
+    "marketplace",
+    "shopping",
+    "Nigeria",
+    "local shops",
+    "price comparison",
+    "market",
+  ],
 };
 
 export default function RootLayout({
@@ -26,12 +33,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-       <Header />
       <body className={`${inter.variable} font-sans`}>
         <Providers>{children}</Providers>
       </body>
-      <Footer />
-      <MobileNav />
     </html>
   );
 }

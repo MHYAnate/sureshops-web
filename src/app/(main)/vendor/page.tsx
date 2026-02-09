@@ -1,3 +1,6 @@
+// src/app/(main)/vendor/page.tsx
+// Re-export the vendor onboarding page
+// The existing code at src/app/vendor/page.tsx should be here
 "use client";
 
 import { useState } from "react";
@@ -13,9 +16,7 @@ export default function VendorOnboardingPage() {
   const router = useRouter();
   const { user, isAuthenticated, isVendor } = useAuth();
   const createVendor = useCreateVendor();
-  const [step, setStep] = useState(1);
 
-  // Already a vendor
   if (isVendor) {
     return (
       <div className="container-premium py-12">
@@ -23,7 +24,7 @@ export default function VendorOnboardingPage() {
           <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="h-8 w-8 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold mb-2">You're already a vendor!</h2>
+          <h2 className="text-2xl font-bold mb-2">You&apos;re already a vendor!</h2>
           <p className="text-muted-foreground mb-6">
             Go to your dashboard to manage your shop and products.
           </p>
@@ -38,7 +39,6 @@ export default function VendorOnboardingPage() {
     );
   }
 
-  // Not logged in
   if (!isAuthenticated) {
     return (
       <div className="container-premium py-12">
@@ -66,7 +66,7 @@ export default function VendorOnboardingPage() {
       await createVendor.mutateAsync(data);
       router.push("/vendor/dashboard");
     } catch (error) {
-      // Error handled by mutation
+      // handled by mutation
     }
   };
 
@@ -79,7 +79,6 @@ export default function VendorOnboardingPage() {
             Set up your shop and start selling to thousands of customers
           </p>
         </div>
-
         <Card className="p-6">
           <VendorForm
             onSubmit={handleSubmit}

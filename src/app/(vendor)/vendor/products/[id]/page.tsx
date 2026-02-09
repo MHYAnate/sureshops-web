@@ -28,7 +28,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
       await updateProduct.mutateAsync({ id: params.id, data });
       router.push("/vendor/products");
     } catch (error) {
-      // Error handled by mutation
+      // handled by mutation
     }
   };
 
@@ -45,7 +45,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
     return (
       <div className="space-y-6">
         <BackButton label="Back to Products" href="/vendor/products" />
-        <p>Product not found</p>
+        <p className="text-muted-foreground">Product not found</p>
       </div>
     );
   }
@@ -56,7 +56,9 @@ export default function EditProductPage({ params }: EditProductPageProps) {
 
       <div>
         <h1 className="text-2xl font-bold">Edit Product</h1>
-        <p className="text-muted-foreground">Update product details</p>
+        <p className="text-muted-foreground">
+          Update details for {product.name}
+        </p>
       </div>
 
       <Card className="p-6">
