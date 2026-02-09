@@ -9,23 +9,97 @@ export interface UploadResponse {
 }
 
 export const uploadService = {
-  async uploadImage(file: File): Promise<UploadResponse> {
-    return api.uploadFile("/upload/image", file);
+  async uploadProductImage(file: File): Promise<UploadResponse> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    // Use axios directly since we need multipart/form-data
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/v1/upload/product`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("access_token="))
+            ?.split("=")[1]}`,
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to upload image");
+    }
+
+    const data = await response.json();
+    return data.data || data;
+  },
+
+  async uploadMultipleProductImages(files: File[]): Promise<UploadResponse[]> {
+    const formData = new FormData();
+    files.forEach((file) => formData.append("files", file));
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/v1/upload/images`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("access_token="))
+            ?.split("=")[1]}`,
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to upload images");
+    }
+
+    const data = await response.json();
+    return data.data || data;
   },
 
   async uploadShopEntrance(file: File): Promise<UploadResponse> {
-    return api.uploadFile("/upload/shop-entrance", file);
+    return this.uploadSingle(file, "shop-entrance");
   },
 
   async uploadShopLogo(file: File): Promise<UploadResponse> {
-    return api.uploadFile("/upload/shop-logo", file);
+    return this.uploadSingle(file, "shop-logo");
   },
 
-  async uploadProductImage(file: File): Promise<UploadResponse> {
-    return api.uploadFile("/upload/product", file);
+  async deleteImage(publicId: string): Promise<void> {
+    await api.delete(`/upload/${encodeURIComponent(publicId)}`);
   },
 
-  async uploadMarketLayout(file: File): Promise<UploadResponse> {
-    return api.uploadFile("/upload/market-layout", file);
+  async uploadSingle(file: File, endpoint: string): Promise<UploadResponse> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/v1/upload/${endpoint}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("access_token="))
+            ?.split("=")[1]}`,
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to upload image");
+    }
+
+    const data = await response.json();
+    return data.data || data;
   },
 };

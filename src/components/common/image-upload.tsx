@@ -1,12 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import Image from "next/image";
-import { Upload, X, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui";
-import { uploadService } from "@/services";
+import { useRef, useState } from "react";
+import { Upload, X, Loader2, ImageIcon } from "lucide-react";
+import { useUpload } from "@/hooks/use-upload";
 import { cn } from "@/lib/utils";
-import toast from "react-hot-toast";
 
 interface ImageUploadProps {
   images: string[];
@@ -21,149 +18,159 @@ export function ImageUpload({
   maxImages = 5,
   className,
 }: ImageUploadProps) {
-  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [dragActive, setDragActive] = useState(false);
 
-  const handleUpload = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-      if (!files || files.length === 0) return;
+  const { uploading, progress, uploadProductImage } = useUpload({
+    maxFiles: maxImages,
+    maxSizeMB: 10,
+  });
 
-      if (images.length + files.length > maxImages) {
-        toast.error(`Maximum ${maxImages} images allowed`);
-        return;
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    const remainingSlots = maxImages - images.length;
+    if (remainingSlots <= 0) {
+      return;
+    }
+
+    const filesToUpload = Array.from(files).slice(0, remainingSlots);
+
+    for (const file of filesToUpload) {
+      const response = await uploadProductImage(file);
+      if (response) {
+        onChange([...images, response.url]);
       }
+    }
+  };
 
-      setUploading(true);
-      const newImages: string[] = [];
-
-      try {
-        for (const file of Array.from(files)) {
-          if (!file.type.startsWith("image/")) {
-            toast.error("Only image files are allowed");
-            continue;
-          }
-
-          if (file.size > 10 * 1024 * 1024) {
-            toast.error("Image size must be less than 10MB");
-            continue;
-          }
-
-          const result = await uploadService.uploadProductImage(file);
-          newImages.push(result.url);
-        }
-
-        onChange([...images, ...newImages]);
-        toast.success("Images uploaded successfully");
-      } catch (error) {
-        toast.error("Failed to upload images");
-      } finally {
-        setUploading(false);
-        e.target.value = "";
-      }
-    },
-    [images, maxImages, onChange]
-  );
-
-  const removeImage = (index: number) => {
+  const handleRemove = (index: number) => {
     const newImages = images.filter((_, i) => i !== index);
     onChange(newImages);
   };
 
-  const moveImage = (from: number, to: number) => {
-    const newImages = [...images];
-    const [removed] = newImages.splice(from, 1);
-    newImages.splice(to, 0, removed);
-    onChange(newImages);
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
   };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    handleFiles(e.dataTransfer.files);
+  };
+
+  const canAddMore = images.length < maxImages;
 
   return (
     <div className={cn("space-y-4", className)}>
-      {/* Image Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-        {images.map((image, index) => (
-          <div
-            key={index}
-            className="relative aspect-square rounded-lg overflow-hidden bg-muted group"
-          >
-            <Image
-              src={image}
-              alt={`Product image ${index + 1}`}
-              fill
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-              {index > 0 && (
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="secondary"
-                  className="h-8 w-8"
-                  onClick={() => moveImage(index, index - 1)}
-                >
-                  ←
-                </Button>
-              )}
-              <Button
+      {/* Upload area */}
+      {canAddMore && (
+        <div
+          onDragEnter={handleDrag}
+          onDragLeave={handleDrag}
+          onDragOver={handleDrag}
+          onDrop={handleDrop}
+          onClick={() => !uploading && fileInputRef.current?.click()}
+          className={cn(
+            "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
+            dragActive
+              ? "border-primary bg-primary/5"
+              : "border-border hover:border-primary/50 hover:bg-muted/50",
+            uploading && "pointer-events-none opacity-60"
+          )}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+            multiple
+            onChange={(e) => handleFiles(e.target.files)}
+            className="hidden"
+            disabled={uploading}
+          />
+
+          {uploading ? (
+            <div className="space-y-3">
+              <Loader2 className="h-8 w-8 mx-auto animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">
+                Uploading... {progress}%
+              </p>
+              <div className="w-full max-w-xs mx-auto bg-muted rounded-full h-2">
+                <div
+                  className="bg-primary h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+              <p className="text-sm font-medium">
+                Click to upload or drag and drop
+              </p>
+              <p className="text-xs text-muted-foreground">
+                JPG, PNG, GIF, WebP up to 10MB ({images.length}/{maxImages})
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Image previews */}
+      {images.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          {images.map((url, index) => (
+            <div
+              key={`${url}-${index}`}
+              className="relative group aspect-square rounded-lg overflow-hidden border border-border"
+            >
+              <img
+                src={url}
+                alt={`Product image ${index + 1}`}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src =
+                    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23f0f0f0'/%3E%3Ctext x='50' y='55' text-anchor='middle' fill='%23999' font-size='12'%3EError%3C/text%3E%3C/svg%3E";
+                }}
+              />
+
+              {/* Remove button */}
+              <button
                 type="button"
-                size="icon"
-                variant="destructive"
-                className="h-8 w-8"
-                onClick={() => removeImage(index)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemove(index);
+                }}
+                className="absolute top-1 right-1 w-6 h-6 bg-destructive text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
               >
-                <X className="h-4 w-4" />
-              </Button>
-              {index < images.length - 1 && (
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="secondary"
-                  className="h-8 w-8"
-                  onClick={() => moveImage(index, index + 1)}
-                >
-                  →
-                </Button>
+                <X className="h-3 w-3" />
+              </button>
+
+              {/* Index badge */}
+              {index === 0 && (
+                <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-primary text-primary-foreground text-xs rounded font-medium">
+                  Main
+                </span>
               )}
             </div>
-            {index === 0 && (
-              <span className="absolute top-2 left-2 px-2 py-1 bg-primary text-primary-foreground text-xs rounded">
-                Main
-              </span>
-            )}
-          </div>
-        ))}
+          ))}
+        </div>
+      )}
 
-        {/* Upload Button */}
-        {images.length < maxImages && (
-          <label
-            className={cn(
-              "aspect-square rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 transition-colors cursor-pointer flex flex-col items-center justify-center gap-2",
-              uploading && "pointer-events-none opacity-50"
-            )}
-          >
-            {uploading ? (
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            ) : (
-              <>
-                <Upload className="h-8 w-8 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Add Image</span>
-              </>
-            )}
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleUpload}
-              disabled={uploading}
-              className="hidden"
-            />
-          </label>
-        )}
-      </div>
-
-      <p className="text-xs text-muted-foreground">
-        Upload up to {maxImages} images. First image will be the main product image.
-        Drag to reorder.
-      </p>
+      {/* Empty state */}
+      {images.length === 0 && !canAddMore && (
+        <div className="text-center py-4">
+          <ImageIcon className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+          <p className="text-sm text-muted-foreground">No images uploaded</p>
+        </div>
+      )}
     </div>
   );
 }
