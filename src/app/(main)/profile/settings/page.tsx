@@ -57,7 +57,7 @@ export default function SettingsPage() {
 
     setUploadingAvatar(true);
     try {
-      const result = await uploadService.uploadImage(file);
+      const result = await uploadService.uploadProductImage(file);
       const updated = await authService.updateProfile({ avatar: result.url } as any);
       setUser(updated);
       toast.success("Avatar updated successfully");
