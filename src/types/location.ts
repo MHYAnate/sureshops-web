@@ -53,3 +53,17 @@ export interface LocationSelection {
   marketId?: string;
   marketName?: string;
 }
+
+
+export interface LocationInfo {
+  state: { id: string; name: string };
+  area: { id: string; name: string };
+  market?: { id: string; name: string; type: string };
+  shopNumber?: string;
+  shopFloor?: string;
+  shopBlock?: string;
+  shopAddress?: string;
+  landmark?: string;
+  coordinates?: [number, number];
+  distance?: number;
+}
