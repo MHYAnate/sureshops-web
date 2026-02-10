@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Input } from "@/components/ui";
-import { formatPrice } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 interface PriceFilterProps {
   minPrice?: number;
@@ -10,6 +8,7 @@ interface PriceFilterProps {
   priceRange?: { min: number; max: number };
   onMinChange: (value: number | undefined) => void;
   onMaxChange: (value: number | undefined) => void;
+  className?: string;
 }
 
 export function PriceFilter({
@@ -18,54 +17,37 @@ export function PriceFilter({
   priceRange,
   onMinChange,
   onMaxChange,
+  className,
 }: PriceFilterProps) {
-  const [localMin, setLocalMin] = useState(minPrice?.toString() || "");
-  const [localMax, setLocalMax] = useState(maxPrice?.toString() || "");
-
-  useEffect(() => {
-    setLocalMin(minPrice?.toString() || "");
-  }, [minPrice]);
-
-  useEffect(() => {
-    setLocalMax(maxPrice?.toString() || "");
-  }, [maxPrice]);
-
-  const handleMinBlur = () => {
-    const value = localMin ? parseInt(localMin, 10) : undefined;
-    onMinChange(value);
-  };
-
-  const handleMaxBlur = () => {
-    const value = localMax ? parseInt(localMax, 10) : undefined;
-    onMaxChange(value);
-  };
-
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <Input
+    <div className={cn("flex items-center gap-2", className)}>
+      <div className="flex-1">
+        <input
           type="number"
-          placeholder="Min"
-          value={localMin}
-          onChange={(e) => setLocalMin(e.target.value)}
-          onBlur={handleMinBlur}
-          className="h-9"
-        />
-        <span className="text-muted-foreground">-</span>
-        <Input
-          type="number"
-          placeholder="Max"
-          value={localMax}
-          onChange={(e) => setLocalMax(e.target.value)}
-          onBlur={handleMaxBlur}
-          className="h-9"
+          value={minPrice ?? ""}
+          onChange={(e) =>
+            onMinChange(e.target.value ? Number(e.target.value) : undefined)
+          }
+          placeholder={
+            priceRange ? `₦${priceRange.min.toLocaleString()}` : "Min"
+          }
+          className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
-      {priceRange && (
-        <p className="text-xs text-muted-foreground">
-          Range: {formatPrice(priceRange.min)} - {formatPrice(priceRange.max)}
-        </p>
-      )}
+      <span className="text-muted-foreground text-sm">—</span>
+      <div className="flex-1">
+        <input
+          type="number"
+          value={maxPrice ?? ""}
+          onChange={(e) =>
+            onMaxChange(e.target.value ? Number(e.target.value) : undefined)
+          }
+          placeholder={
+            priceRange ? `₦${priceRange.max.toLocaleString()}` : "Max"
+          }
+          className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        />
+      </div>
     </div>
   );
 }

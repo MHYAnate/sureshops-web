@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { MapPin, ChevronDown, X } from "lucide-react";
+import { useState } from "react";
+import { MapPin, ChevronDown, X, Navigation } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button, Select } from "@/components/ui";
-import { useLocation } from "@/hooks";
+import { Button, Badge } from "@/components/ui";
+import { useLocationSelector } from "@/hooks/use-location";
 import { cn } from "@/lib/utils";
 
 interface LocationFilterProps {
   stateId?: string;
   areaId?: string;
   marketId?: string;
-  onStateChange: (id: string | undefined) => void;
-  onAreaChange: (id: string | undefined) => void;
-  onMarketChange: (id: string | undefined) => void;
+  onStateChange: (id: string) => void;
+  onAreaChange: (id: string) => void;
+  onMarketChange: (id: string) => void;
   className?: string;
 }
 
@@ -27,62 +27,56 @@ export function LocationFilter({
   className,
 }: LocationFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
+
   const {
     states,
     areas,
     markets,
-    selectedState,
-    selectedArea,
-    selectedMarket,
-    setSelectedState,
-    setSelectedArea,
-    setSelectedMarket,
-    loading,
-    getLocationString,
-    clearLocationFilters,
-  } = useLocation();
+    statesLoading,
+    areasLoading,
+    marketsLoading,
+    selectedLocation,
+    handleStateChange,
+    handleAreaChange,
+    handleMarketChange,
+    clearLocation,
+  } = useLocationSelector();
 
-  // Sync with external props
-  useEffect(() => {
-    if (stateId && states.length > 0) {
-      const state = states.find((s) => s.id === stateId);
-      if (state && state.id !== selectedState?.id) {
-        setSelectedState(state);
-      }
-    }
-  }, [stateId, states]);
-
-  const handleStateChange = (id: string) => {
-    const state = states.find((s) => s.id === id);
-    setSelectedState(state || null);
-    onStateChange(id || undefined);
-    onAreaChange(undefined);
-    onMarketChange(undefined);
+  const onSelectState = (id: string) => {
+    handleStateChange(id);
+    onStateChange(id);
+    onAreaChange("");
+    onMarketChange("");
   };
 
-  const handleAreaChange = (id: string) => {
-    const area = areas.find((a) => a.id === id);
-    setSelectedArea(area || null);
-    onAreaChange(id || undefined);
-    onMarketChange(undefined);
+  const onSelectArea = (id: string) => {
+    handleAreaChange(id);
+    onAreaChange(id);
+    onMarketChange("");
   };
 
-  const handleMarketChange = (id: string) => {
-    const market = markets.find((m) => m.id === id);
-    setSelectedMarket(market || null);
-    onMarketChange(id || undefined);
+  const onSelectMarket = (id: string) => {
+    handleMarketChange(id);
+    onMarketChange(id);
   };
 
-  const handleClear = () => {
-    clearLocationFilters();
-    onStateChange(undefined);
-    onAreaChange(undefined);
-    onMarketChange(undefined);
+  const onClear = () => {
+    clearLocation();
+    onStateChange("");
+    onAreaChange("");
+    onMarketChange("");
     setIsOpen(false);
   };
 
-  const locationText = getLocationString() || "All Locations";
-  const hasSelection = selectedState || selectedArea || selectedMarket;
+  const hasLocation = stateId || areaId || marketId;
+
+  const getLabel = () => {
+    if (selectedLocation.marketName) return selectedLocation.marketName;
+    if (selectedLocation.areaName)
+      return `${selectedLocation.areaName}, ${selectedLocation.stateName}`;
+    if (selectedLocation.stateName) return selectedLocation.stateName;
+    return "Location";
+  };
 
   return (
     <div className={cn("relative", className)}>
@@ -90,21 +84,24 @@ export function LocationFilter({
         variant="outline"
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
-        className="gap-2"
+        className={cn("gap-2", hasLocation && "border-primary text-primary")}
       >
         <MapPin className="h-4 w-4" />
-        <span className="max-w-[150px] truncate">{locationText}</span>
-        {hasSelection ? (
-          <X
-            className="h-4 w-4 hover:text-destructive"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleClear();
-            }}
-          />
-        ) : (
-          <ChevronDown className="h-4 w-4" />
+        <span className="max-w-[150px] truncate">{getLabel()}</span>
+        {hasLocation && (
+          <Badge
+            variant="secondary"
+            className="ml-1 h-5 w-5 p-0 flex items-center justify-center"
+          >
+            {[stateId, areaId, marketId].filter(Boolean).length}
+          </Badge>
         )}
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 transition-transform",
+            isOpen && "rotate-180"
+          )}
+        />
       </Button>
 
       <AnimatePresence>
@@ -114,89 +111,150 @@ export function LocationFilter({
               className="fixed inset-0 z-40"
               onClick={() => setIsOpen(false)}
             />
+
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="absolute left-0 z-50 mt-2 w-72 rounded-xl border border-border bg-background p-4 shadow-xl"
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="absolute left-0 top-full z-50 mt-2 w-80 rounded-xl border border-border bg-background p-4 shadow-xl"
             >
-              <div className="space-y-4">
-                <h4 className="font-medium">Filter by Location</h4>
-
-                {/* State */}
-                <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">
-                    State
-                  </label>
-                  <Select
-                    value={selectedState?.id || ""}
-                    onChange={handleStateChange}
-                    options={[
-                      { value: "", label: "All States" },
-                      ...states.map((s) => ({ value: s.id, label: s.name })),
-                    ]}
-                    placeholder="Select state"
-                    disabled={loading}
-                  />
-                </div>
-
-                {/* Area */}
-                {selectedState && (
-                  <div>
-                    <label className="text-sm text-muted-foreground mb-1 block">
-                      Area
-                    </label>
-                    <Select
-                      value={selectedArea?.id || ""}
-                      onChange={handleAreaChange}
-                      options={[
-                        { value: "", label: "All Areas" },
-                        ...areas.map((a) => ({ value: a.id, label: a.name })),
-                      ]}
-                      placeholder="Select area"
-                      disabled={loading || areas.length === 0}
-                    />
-                  </div>
-                )}
-
-                {/* Market */}
-                {selectedArea && markets.length > 0 && (
-                  <div>
-                    <label className="text-sm text-muted-foreground mb-1 block">
-                      Market / Mall
-                    </label>
-                    <Select
-                      value={selectedMarket?.id || ""}
-                      onChange={handleMarketChange}
-                      options={[
-                        { value: "", label: "All Markets" },
-                        ...markets.map((m) => ({ value: m.id, label: m.name })),
-                      ]}
-                      placeholder="Select market"
-                      disabled={loading}
-                    />
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div className="flex gap-2 pt-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleClear}
-                    className="flex-1"
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-semibold text-sm flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Select Location
+                </h4>
+                {hasLocation && (
+                  <button
+                    onClick={onClear}
+                    className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
                   >
+                    <X className="h-3 w-3" />
                     Clear
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => setIsOpen(false)}
-                    className="flex-1"
-                  >
-                    Apply
-                  </Button>
-                </div>
+                  </button>
+                )}
               </div>
+
+              {/* State */}
+              <div className="mb-3">
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                  State
+                </label>
+                <select
+                  value={stateId || selectedLocation.stateId || ""}
+                  onChange={(e) => onSelectState(e.target.value)}
+                  className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  disabled={statesLoading}
+                >
+                  <option value="">
+                    {statesLoading ? "Loading states..." : "Select state"}
+                  </option>
+                  {states.map((state) => (
+                    <option key={state.id} value={state.id}>
+                      {state.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Area */}
+              <div className="mb-3">
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                  Area / LGA
+                </label>
+                <select
+                  value={areaId || selectedLocation.areaId || ""}
+                  onChange={(e) => onSelectArea(e.target.value)}
+                  className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+                  disabled={
+                    (!stateId && !selectedLocation.stateId) || areasLoading
+                  }
+                >
+                  <option value="">
+                    {areasLoading
+                      ? "Loading areas..."
+                      : !stateId && !selectedLocation.stateId
+                        ? "Select state first"
+                        : areas.length === 0
+                          ? "No areas available"
+                          : "Select area"}
+                  </option>
+                  {areas.map((area) => (
+                    <option key={area.id} value={area.id}>
+                      {area.name}
+                      {area.localGovernment
+                        ? ` (${area.localGovernment})`
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Market */}
+              <div className="mb-4">
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                  Market / Mall
+                </label>
+                <select
+                  value={marketId || selectedLocation.marketId || ""}
+                  onChange={(e) => onSelectMarket(e.target.value)}
+                  className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+                  disabled={
+                    (!areaId && !selectedLocation.areaId) || marketsLoading
+                  }
+                >
+                  <option value="">
+                    {marketsLoading
+                      ? "Loading markets..."
+                      : !areaId && !selectedLocation.areaId
+                        ? "Select area first"
+                        : markets.length === 0
+                          ? "No markets available"
+                          : "All markets (optional)"}
+                  </option>
+                  {markets.map((market) => (
+                    <option key={market.id} value={market.id}>
+                      {market.name}
+                      {market.type
+                        ? ` — ${market.type.replace(/_/g, " ")}`
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Use Current Location */}
+              <button
+                onClick={() => {
+                  if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                      (position) => {
+                        console.log(
+                          "Location:",
+                          position.coords.latitude,
+                          position.coords.longitude
+                        );
+                        setIsOpen(false);
+                      },
+                      (error) => {
+                        console.error("Geolocation error:", error);
+                      }
+                    );
+                  }
+                }}
+                className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border py-2 text-sm text-muted-foreground hover:text-foreground hover:border-foreground transition-colors"
+              >
+                <Navigation className="h-4 w-4" />
+                Use my current location
+              </button>
+
+              <Button
+                className="w-full mt-3"
+                size="sm"
+                onClick={() => setIsOpen(false)}
+              >
+                Apply Location
+              </Button>
             </motion.div>
           </>
         )}

@@ -3,14 +3,23 @@ export interface State {
   name: string;
   code: string;
   capital?: string;
+  country?: string;
+  location?: {
+    type: "Point";
+    coordinates: [number, number];
+  };
   isActive: boolean;
 }
 
 export interface Area {
   id: string;
   name: string;
-  stateId: string;
+  stateId: string | { id: string; name: string; code: string };
   localGovernment?: string;
+  location?: {
+    type: "Point";
+    coordinates: [number, number];
+  };
   postalCode?: string;
   isActive: boolean;
 }
@@ -18,27 +27,29 @@ export interface Area {
 export interface Market {
   id: string;
   name: string;
-  type: 'traditional_market' | 'shopping_mall' | 'plaza' | 'shopping_complex' | 'street_market';
-  stateId: string;
-  areaId: string;
+  type: string;
+  stateId: string | { id: string; name: string; code: string };
+  areaId: string | { id: string; name: string };
   address?: string;
   landmark?: string;
+  location?: {
+    type: "Point";
+    coordinates: [number, number];
+  };
   entrancePhoto?: string;
-  layoutMap?: string;
+  openingTime?: string;
+  closingTime?: string;
+  operatingDays?: string[];
   totalShops: number;
   isActive: boolean;
   isVerified: boolean;
 }
 
-export interface LocationInfo {
-  state: { id: string; name: string };
-  area: { id: string; name: string };
-  market?: { id: string; name: string; type: string };
-  shopNumber?: string;
-  shopFloor?: string;
-  shopBlock?: string;
-  shopAddress?: string;
-  landmark?: string;
-  coordinates?: [number, number];
-  distance?: number;
+export interface LocationSelection {
+  stateId?: string;
+  stateName?: string;
+  areaId?: string;
+  areaName?: string;
+  marketId?: string;
+  marketName?: string;
 }

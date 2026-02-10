@@ -41,8 +41,11 @@
   
 //   clearRecentSearches: () => set({ recentSearches: [] }),
 // }));
-import { create } from "zustand";
+
 import { SearchFilters, AvailableFilters } from "@/types";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { LocationSelection } from "@/types/location";
 
 interface SearchState {
   query: string;
@@ -104,3 +107,96 @@ export const useSearchStore = create<SearchState>((set, get) => ({
       filters: filters || {},
     }),
 }));
+
+
+
+interface LocationState {
+  selectedLocation: LocationSelection;
+  setLocation: (location: LocationSelection) => void;
+  setState: (stateId: string, stateName: string) => void;
+  setArea: (areaId: string, areaName: string) => void;
+  setMarket: (marketId: string, marketName: string) => void;
+  clearLocation: () => void;
+  clearArea: () => void;
+  clearMarket: () => void;
+  getLocationLabel: () => string;
+}
+
+export const useLocationStore = create<LocationState>()(
+  persist(
+    (set, get) => ({
+      selectedLocation: {},
+
+      setLocation: (location) => set({ selectedLocation: location }),
+
+      setState: (stateId, stateName) =>
+        set({
+          selectedLocation: {
+            stateId,
+            stateName,
+            areaId: undefined,
+            areaName: undefined,
+            marketId: undefined,
+            marketName: undefined,
+          },
+        }),
+
+      setArea: (areaId, areaName) =>
+        set((state) => ({
+          selectedLocation: {
+            ...state.selectedLocation,
+            areaId,
+            areaName,
+            marketId: undefined,
+            marketName: undefined,
+          },
+        })),
+
+      setMarket: (marketId, marketName) =>
+        set((state) => ({
+          selectedLocation: {
+            ...state.selectedLocation,
+            marketId,
+            marketName,
+          },
+        })),
+
+      clearLocation: () => set({ selectedLocation: {} }),
+
+      clearArea: () =>
+        set((state) => ({
+          selectedLocation: {
+            ...state.selectedLocation,
+            areaId: undefined,
+            areaName: undefined,
+            marketId: undefined,
+            marketName: undefined,
+          },
+        })),
+
+      clearMarket: () =>
+        set((state) => ({
+          selectedLocation: {
+            ...state.selectedLocation,
+            marketId: undefined,
+            marketName: undefined,
+          },
+        })),
+
+      getLocationLabel: () => {
+        const loc = get().selectedLocation;
+        const parts: string[] = [];
+        if (loc.marketName) parts.push(loc.marketName);
+        else if (loc.areaName) parts.push(loc.areaName);
+        if (loc.stateName) parts.push(loc.stateName);
+        return parts.join(", ") || "All Locations";
+      },
+    }),
+    {
+      name: "sureshops-location",
+      partialize: (state) => ({
+        selectedLocation: state.selectedLocation,
+      }),
+    }
+  )
+);
