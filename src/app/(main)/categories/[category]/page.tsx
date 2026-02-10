@@ -1,6 +1,7 @@
+// src/app/(main)/categories/[category]/page.tsx
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { BackButton, Pagination, LoadingState } from "@/components/common";
 import { ProductGrid } from "@/components/products";
@@ -8,19 +9,29 @@ import { SearchFilters } from "@/components/search";
 import { searchService } from "@/services";
 import { CATEGORIES } from "@/lib/constants";
 
+// ✅ FIX: params is a Promise in Next.js 15
 interface CategoryPageProps {
-  params: { category: string };
+  params: Promise<{ category: string }>;
 }
 
 export default function CategoryPage({ params }: CategoryPageProps) {
+  // ✅ FIX: Unwrap the promise with React.use()
+  const { category: categorySlug } = use(params);
+
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<any>({});
 
-  const category = CATEGORIES.find((c) => c.slug === params.category);
-  const categoryName = category?.name || params.category;
+  // ✅ FIX: Match by slug (which now equals the category name)
+  const category = CATEGORIES.find(
+    (c) =>
+      c.slug === categorySlug ||
+      c.slug === decodeURIComponent(categorySlug) ||
+      c.name.toLowerCase() === decodeURIComponent(categorySlug).toLowerCase()
+  );
+  const categoryName = category?.name || decodeURIComponent(categorySlug);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["category-products", params.category, page, filters],
+    queryKey: ["category-products", categorySlug, page, filters],
     queryFn: () =>
       searchService.searchProducts({
         query: "",

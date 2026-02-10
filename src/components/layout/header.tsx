@@ -41,9 +41,7 @@ export function Header() {
       <div className="container-premium">
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="/" className="flex-shrink-0">
-            <Logo />
-          </Link>
+          <Logo href="/" className="flex-shrink-0" />
 
           {/* Search Bar - Desktop */}
           <form

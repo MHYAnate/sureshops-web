@@ -1,6 +1,7 @@
+// src/app/(main)/products/[id]/page.tsx
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -26,27 +27,29 @@ import { useProduct } from "@/hooks";
 import { searchService } from "@/services";
 import { useQuery } from "@tanstack/react-query";
 
+// ✅ FIX: params is a Promise in Next.js 15
 interface ProductPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default function ProductPage({ params }: ProductPageProps) {
-  const { data: product, isLoading } = useProduct(params.id);
+  // ✅ FIX: Unwrap with React.use()
+  const { id } = use(params);
+
+  const { data: product, isLoading } = useProduct(id);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showAllVendors, setShowAllVendors] = useState(false);
 
-  // Fetch vendors selling this product
   const { data: productVendors } = useQuery({
     queryKey: ["product-vendors", product?.name],
     queryFn: () => searchService.getProductVendors(product!.name),
     enabled: !!product?.name,
   });
 
-  // Fetch similar products
   const { data: similarProducts } = useQuery({
-    queryKey: ["similar-products", params.id],
-    queryFn: () => searchService.getSimilarProducts(params.id),
-    enabled: !!params.id,
+    queryKey: ["similar-products", id],
+    queryFn: () => searchService.getSimilarProducts(id),
+    enabled: !!id,
   });
 
   if (isLoading) {
@@ -83,8 +86,6 @@ export default function ProductPage({ params }: ProductPageProps) {
               className="object-cover"
               priority
             />
-
-            {/* Navigation Arrows */}
             {images.length > 1 && (
               <>
                 <button
@@ -109,8 +110,6 @@ export default function ProductPage({ params }: ProductPageProps) {
                 </button>
               </>
             )}
-
-            {/* Stock Badge */}
             {!product.inStock && (
               <Badge variant="destructive" className="absolute top-4 left-4">
                 Out of Stock
@@ -118,7 +117,6 @@ export default function ProductPage({ params }: ProductPageProps) {
             )}
           </div>
 
-          {/* Thumbnails */}
           {images.length > 1 && (
             <div className="flex gap-2 overflow-x-auto no-scrollbar">
               {images.map((image, index) => (
@@ -145,14 +143,11 @@ export default function ProductPage({ params }: ProductPageProps) {
 
         {/* Product Info */}
         <div className="space-y-6">
-          {/* Header */}
           <div>
             {product.brand && (
               <p className="text-sm text-muted-foreground mb-1">{product.brand}</p>
             )}
             <h1 className="text-2xl md:text-3xl font-bold">{product.name}</h1>
-
-            {/* Category */}
             <div className="flex items-center gap-2 mt-2">
               <Badge variant="secondary">{product.category}</Badge>
               {product.subcategory && (
@@ -161,7 +156,6 @@ export default function ProductPage({ params }: ProductPageProps) {
             </div>
           </div>
 
-          {/* Price */}
           <div className="pb-6 border-b border-border">
             <PriceTag
               price={product.price}
@@ -177,7 +171,6 @@ export default function ProductPage({ params }: ProductPageProps) {
             )}
           </div>
 
-          {/* Vendor Card */}
           {vendor && (
             <Card className="p-4">
               <div className="flex items-start gap-4">
@@ -199,7 +192,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <Link
-                      href={`/shops/${vendor._id}`}
+                      href={`/shops/${vendor._id || vendor.id}`}
                       className="font-semibold hover:text-primary transition-colors"
                     >
                       {vendor.businessName}
@@ -217,7 +210,6 @@ export default function ProductPage({ params }: ProductPageProps) {
                 </div>
               </div>
 
-              {/* Contact Actions */}
               <div className="flex gap-2 mt-4">
                 <Button
                   className="flex-1"
@@ -232,10 +224,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                     className="flex-1"
                     onClick={() =>
                       window.open(
-                        `https://wa.me/${vendor.contactDetails.whatsapp?.replace(
-                          /\D/g,
-                          ""
-                        )}`
+                        `https://wa.me/${vendor.contactDetails.whatsapp?.replace(/\D/g, "")}`
                       )
                     }
                   >
@@ -262,7 +251,6 @@ export default function ProductPage({ params }: ProductPageProps) {
             </Card>
           )}
 
-          {/* Description */}
           {product.description && (
             <div>
               <h3 className="font-semibold mb-2">Description</h3>
@@ -270,7 +258,6 @@ export default function ProductPage({ params }: ProductPageProps) {
             </div>
           )}
 
-          {/* Specifications */}
           {product.specifications && Object.keys(product.specifications).length > 0 && (
             <div>
               <h3 className="font-semibold mb-2">Specifications</h3>
@@ -287,7 +274,6 @@ export default function ProductPage({ params }: ProductPageProps) {
         </div>
       </div>
 
-      {/* Price Comparison */}
       {productVendors && productVendors.vendors.length > 1 && (
         <div className="mt-12">
           <PriceComparison

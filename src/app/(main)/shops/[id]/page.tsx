@@ -1,7 +1,7 @@
 // src/app/(main)/shops/[id]/page.tsx
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -29,29 +29,41 @@ import { useToggleFavorite } from "@/hooks/use-favorites";
 import { FavoriteType } from "@/types/favorites";
 import { formatPrice, isOpen as checkIsOpen } from "@/lib/utils";
 
+function extractId(ref: any): string {
+  if (!ref) return "";
+  if (typeof ref === "string") return ref;
+  if (typeof ref === "object") {
+    return ref.id || ref._id?.toString() || "";
+  }
+  return String(ref);
+}
+
+// ✅ FIX: params is now a Promise in Next.js 15
 interface ShopPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default function ShopPage({ params }: ShopPageProps) {
+  // ✅ FIX: Unwrap the promise with React.use()
+  const { id } = use(params);
+
   const [productPage, setProductPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState("");
   const toggleFavorite = useToggleFavorite();
 
   const { data: shop, isLoading: shopLoading } = useQuery({
-    queryKey: ["shop", params.id],
-    queryFn: () => vendorService.getById(params.id),
+    queryKey: ["shop", id],
+    queryFn: () => vendorService.getById(id),
   });
 
   const { data: shopProducts, isLoading: productsLoading } = useQuery({
-    queryKey: ["shop-products", params.id, productPage, selectedCategory],
+    queryKey: ["shop-products", id, productPage, selectedCategory],
     queryFn: () =>
-      searchService.getShopProducts(params.id, {
+      searchService.getShopProducts(id, {
         page: productPage,
-        // limit: 12,
         category: selectedCategory || undefined,
       }),
-    enabled: !!params.id,
+    enabled: !!id,
   });
 
   if (shopLoading) {
@@ -75,45 +87,24 @@ export default function ShopPage({ params }: ShopPageProps) {
     );
   }
 
-  // Extract populated refs
   const stateRef = shop.stateId as any;
   const areaRef = shop.areaId as any;
   const marketRef = shop.marketId as any;
 
-  const stateName =
-    typeof stateRef === "object" && stateRef ? stateRef.name : "";
-  const areaName =
-    typeof areaRef === "object" && areaRef ? areaRef.name : "";
-  const marketName =
-    typeof marketRef === "object" && marketRef ? marketRef.name : "";
-  const marketType =
-    typeof marketRef === "object" && marketRef ? marketRef.type : "";
+  const stateName = typeof stateRef === "object" && stateRef ? stateRef.name : "";
+  const areaName = typeof areaRef === "object" && areaRef ? areaRef.name : "";
+  const marketName = typeof marketRef === "object" && marketRef ? marketRef.name : "";
+  const marketType = typeof marketRef === "object" && marketRef ? marketRef.type : "";
 
   const shopIsOpen = shop.operatingHours
-    ? checkIsOpen(
-        shop.operatingHours.openingTime,
-        shop.operatingHours.closingTime
-      )
+    ? checkIsOpen(shop.operatingHours.openingTime, shop.operatingHours.closingTime)
     : true;
 
   const locationInfo = {
-    state: {
-      id: typeof stateRef === "object" ? stateRef?.id || "" : stateRef || "",
-      name: stateName,
-    },
-    area: {
-      id: typeof areaRef === "object" ? areaRef?.id || "" : areaRef || "",
-      name: areaName,
-    },
+    state: { id: extractId(stateRef), name: stateName },
+    area: { id: extractId(areaRef), name: areaName },
     market: marketRef
-      ? {
-          id:
-            typeof marketRef === "object"
-              ? marketRef?.id || ""
-              : marketRef || "",
-          name: marketName,
-          type: marketType,
-        }
+      ? { id: extractId(marketRef), name: marketName, type: marketType }
       : undefined,
     shopNumber: shop.shopNumber,
     shopFloor: shop.shopFloor,
@@ -158,7 +149,6 @@ export default function ShopPage({ params }: ShopPageProps) {
               )}
             </div>
 
-            {/* Logo */}
             <div className="absolute -bottom-8 left-6">
               <div className="w-20 h-20 rounded-xl border-4 border-background bg-muted overflow-hidden shadow-lg">
                 {shop.shopImages?.logo ? (
@@ -189,11 +179,7 @@ export default function ShopPage({ params }: ShopPageProps) {
                   {shop.isVerified && <VerifiedBadge size="lg" />}
                 </div>
                 <div className="flex items-center gap-4 mt-2">
-                  <Rating
-                    value={shop.rating || 0}
-                    count={shop.reviewCount}
-                    size="md"
-                  />
+                  <Rating value={shop.rating || 0} count={shop.reviewCount} size="md" />
                   <Badge variant="outline">
                     {shop.vendorType?.replace(/_/g, " ")}
                   </Badge>
@@ -241,7 +227,6 @@ export default function ShopPage({ params }: ShopPageProps) {
               </p>
             )}
 
-            {/* Stats */}
             <div className="flex gap-6 mt-4 text-sm">
               <div>
                 <span className="font-bold text-lg">{shop.totalProducts}</span>
@@ -254,20 +239,15 @@ export default function ShopPage({ params }: ShopPageProps) {
               {shop.minProductPrice > 0 && (
                 <div>
                   <span className="text-muted-foreground">From </span>
-                  <span className="font-bold">
-                    {formatPrice(shop.minProductPrice)}
-                  </span>
+                  <span className="font-bold">{formatPrice(shop.minProductPrice)}</span>
                 </div>
               )}
             </div>
 
-            {/* Categories */}
             {shop.categories && shop.categories.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-4">
                 {shop.categories.map((cat: string) => (
-                  <Badge key={cat} variant="secondary">
-                    {cat}
-                  </Badge>
+                  <Badge key={cat} variant="secondary">{cat}</Badge>
                 ))}
               </div>
             )}
@@ -282,10 +262,7 @@ export default function ShopPage({ params }: ShopPageProps) {
                   <Button
                     size="sm"
                     variant={!selectedCategory ? "default" : "outline"}
-                    onClick={() => {
-                      setSelectedCategory("");
-                      setProductPage(1);
-                    }}
+                    onClick={() => { setSelectedCategory(""); setProductPage(1); }}
                   >
                     All
                   </Button>
@@ -293,13 +270,8 @@ export default function ShopPage({ params }: ShopPageProps) {
                     <Button
                       key={cat}
                       size="sm"
-                      variant={
-                        selectedCategory === cat ? "default" : "outline"
-                      }
-                      onClick={() => {
-                        setSelectedCategory(cat);
-                        setProductPage(1);
-                      }}
+                      variant={selectedCategory === cat ? "default" : "outline"}
+                      onClick={() => { setSelectedCategory(cat); setProductPage(1); }}
                     >
                       {cat}
                     </Button>
@@ -331,14 +303,11 @@ export default function ShopPage({ params }: ShopPageProps) {
 
         {/* Sidebar */}
         <div className="space-y-6">
-          {/* Quick contact */}
           <Card className="p-4">
             <div className="flex gap-2">
               <Button
                 className="flex-1"
-                onClick={() =>
-                  window.open(`tel:${shop.contactDetails.phone}`)
-                }
+                onClick={() => window.open(`tel:${shop.contactDetails.phone}`)}
               >
                 <Phone className="mr-2 h-4 w-4" />
                 Call
@@ -360,15 +329,8 @@ export default function ShopPage({ params }: ShopPageProps) {
             </div>
           </Card>
 
-          <ShopLocation
-            location={locationInfo}
-            operatingHours={shop.operatingHours}
-          />
-
-          <ShopContact
-            contactDetails={shop.contactDetails}
-            bankDetails={shop.bankDetails}
-          />
+          <ShopLocation location={locationInfo} operatingHours={shop.operatingHours} />
+          <ShopContact contactDetails={shop.contactDetails} bankDetails={shop.bankDetails} />
         </div>
       </div>
     </div>

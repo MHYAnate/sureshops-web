@@ -1,0 +1,1263 @@
+// src/app/(main)/home/page.tsx
+import { Metadata } from "next";
+import Link from "next/link";
+import {
+  ArrowRight,
+  MapPin,
+  Store,
+  TrendingUp,
+  Shield,
+  Search,
+} from "lucide-react";
+import { Button, Card } from "@/components/ui";
+import { HomeSearch } from "@/components/search/home-search";
+import { CATEGORIES } from "@/lib/constants";
+
+export const metadata: Metadata = {
+  title: "SureShops - Find Products, Compare Prices",
+};
+
+export default function HomePage() {
+  return (
+    <div>
+      {/* Hero */}
+      <section className="relative bg-gradient-to-b from-muted/50 to-background pt-12 pb-20">
+        <div className="container-premium">
+          <div className="max-w-3xl mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+              Find Products.{" "}
+              <span className="text-muted-foreground">Compare Prices.</span>
+            </h1>
+            <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
+              Standing in the parking lot? Set your market location, search for
+              any product, and instantly see every shop that has it — with
+              prices, shop numbers, and directions.
+            </p>
+
+            <div className="mt-10 max-w-2xl mx-auto">
+              <HomeSearch />
+            </div>
+
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              {["iPhone", "Laptop", "Shoes", "Electronics", "Fashion"].map(
+                (term) => (
+                  <Link
+                    key={term}
+                    href={`/search?query=${term}`}
+                    className="px-4 py-2 rounded-full bg-muted text-sm hover:bg-muted/80 transition-colors"
+                  >
+                    {term}
+                  </Link>
+                )
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="py-16">
+        <div className="container-premium">
+          <h2 className="text-2xl font-bold text-center mb-10">
+            How SureShops Works
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[
+              {
+                step: "1",
+                icon: <MapPin className="h-6 w-6" />,
+                title: "Select Your Market",
+                desc: "Choose your state, area, and the specific market you are visiting or near",
+              },
+              {
+                step: "2",
+                icon: <Search className="h-6 w-6" />,
+                title: "Search a Product",
+                desc: "Type the product you are looking for — phones, shoes, laptops, anything",
+              },
+              {
+                step: "3",
+                icon: <TrendingUp className="h-6 w-6" />,
+                title: "Compare Prices",
+                desc: "See all shops that carry that product with their prices side by side",
+              },
+              {
+                step: "4",
+                icon: <Store className="h-6 w-6" />,
+                title: "Visit the Shop",
+                desc: "Get the exact shop number, floor, block, and call the vendor directly",
+              },
+            ].map((item) => (
+              <Card key={item.step} className="p-6 text-center relative">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
+                  {item.step}
+                </div>
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 mt-2">
+                  {item.icon}
+                </div>
+                <h3 className="font-semibold text-lg">{item.title}</h3>
+                <p className="text-muted-foreground mt-2 text-sm">
+                  {item.desc}
+                </p>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-16 bg-muted/30">
+        <div className="container-premium">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card className="p-6 text-center">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <TrendingUp className="h-6 w-6" />
+              </div>
+              <h3 className="font-semibold text-lg">Compare Prices</h3>
+              <p className="text-muted-foreground mt-2 text-sm">
+                See prices from multiple vendors in the same market instantly
+              </p>
+            </Card>
+            <Card className="p-6 text-center">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <MapPin className="h-6 w-6" />
+              </div>
+              <h3 className="font-semibold text-lg">Find Exact Shop</h3>
+              <p className="text-muted-foreground mt-2 text-sm">
+                Get shop numbers, floor, block, and landmark directions
+              </p>
+            </Card>
+            <Card className="p-6 text-center">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <Shield className="h-6 w-6" />
+              </div>
+              <h3 className="font-semibold text-lg">Verified Vendors</h3>
+              <p className="text-muted-foreground mt-2 text-sm">
+                Shop with confidence from verified local businesses
+              </p>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Categories */}
+      <section className="py-16">
+        <div className="container-premium">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-bold">Browse Categories</h2>
+              <p className="text-muted-foreground mt-1">
+                Explore products by category
+              </p>
+            </div>
+            <Button variant="ghost" asChild>
+              <Link href="/categories">
+                View All
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            {CATEGORIES.slice(0, 10).map((category) => (
+              <Link
+                key={category.slug}
+                href={`/categories/${category.slug}`}
+                className="group"
+              >
+                <Card className="p-6 text-center hover:shadow-lg transition-all">
+                  <span className="text-3xl mb-3 block">{category.icon}</span>
+                  <h3 className="font-medium group-hover:text-primary transition-colors">
+                    {category.name}
+                  </h3>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20">
+        <div className="container-premium">
+          <Card className="bg-foreground text-background p-12 text-center">
+            <Store className="h-12 w-12 mx-auto mb-6" />
+            <h2 className="text-3xl font-bold">Are you a vendor?</h2>
+            <p className="mt-4 text-background/80 max-w-xl mx-auto">
+              Join thousands of vendors on SureShops. List your products, reach
+              more customers, and grow your business.
+            </p>
+            <Button
+              size="lg"
+              className="mt-8 bg-background text-foreground hover:bg-background/90"
+              asChild
+            >
+              <Link href="/vendor">
+                Start Selling
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+          </Card>
+        </div>
+      </section>
+    </div>
+  );
+}
+// // src/app/(main)/search/search-content.tsx
+// "use client";
+
+// import { useSearchParams } from "next/navigation";
+// import { useEffect, useState, useRef } from "react";
+// import { SearchBar, SearchFilters, SearchResults } from "@/components/search";
+// import { BackButton, LoadingState } from "@/components/common";
+// import { useSearch } from "@/hooks";
+// import { SearchType } from "@/types";
+
+// export function SearchPageContent() {
+//   const searchParams = useSearchParams();
+//   const initializedRef = useRef(false);
+
+//   const initialQuery = searchParams.get("query") || "";
+//   const initialStateId = searchParams.get("stateId") || "";
+//   const initialAreaId = searchParams.get("areaId") || "";
+//   const initialMarketId = searchParams.get("marketId") || "";
+//   const initialSearchType =
+//     (searchParams.get("searchType") as SearchType) || "all";
+
+//   const {
+//     query,
+//     filters,
+//     results,
+//     isLoading,
+//     setQuery,
+//     updateFilter,
+//     clearFilters,
+//   } = useSearch();
+
+//   const [searchType, setSearchType] = useState<SearchType>(initialSearchType);
+
+//   // Initialize from URL params once
+//   useEffect(() => {
+//     if (initializedRef.current) return;
+//     initializedRef.current = true;
+
+//     if (initialQuery) setQuery(initialQuery);
+//     if (initialStateId) updateFilter("stateId", initialStateId);
+//     if (initialAreaId) updateFilter("areaId", initialAreaId);
+//     if (initialMarketId) updateFilter("marketId", initialMarketId);
+//     if (initialSearchType !== "all")
+//       updateFilter("searchType", initialSearchType);
+//   }, []);
+
+//   const handlePageChange = (page: number) => {
+//     updateFilter("page", page);
+//     window.scrollTo({ top: 0, behavior: "smooth" });
+//   };
+
+//   const handleSearchTypeChange = (type: SearchType) => {
+//     setSearchType(type);
+//     updateFilter("searchType", type);
+//   };
+
+//   return (
+//     <div className="container-premium py-6">
+//       <div className="mb-6">
+//         <BackButton />
+//       </div>
+
+//       <div className="mb-6">
+//         <SearchBar
+//           placeholder="Search products, shops, brands..."
+//           autoFocus={!initialQuery}
+//         />
+//       </div>
+
+//       <SearchFilters
+//         filters={filters}
+//         availableFilters={results?.availableFilters}
+//         onFilterChange={updateFilter}
+//         onClearFilters={clearFilters}
+//         className="mb-6"
+//       />
+
+//       <SearchResults
+//         results={results}
+//         isLoading={isLoading}
+//         searchType={searchType}
+//         onSearchTypeChange={handleSearchTypeChange}
+//         onPageChange={handlePageChange}
+//         currentPage={filters.page || 1}
+//       />
+//     </div>
+//   );
+// }
+// src/app/(main)/search/search-content.tsx
+"use client";
+
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState, useRef, useMemo } from "react";
+import { SearchBar, SearchFilters, SearchResults } from "@/components/search";
+import { BackButton, LoadingState } from "@/components/common";
+import { useSearch } from "@/hooks";
+import { SearchType } from "@/types";
+
+export function SearchPageContent() {
+  const searchParams = useSearchParams();
+
+  // ✅ FIX: Read URL params reactively (not just once)
+  const urlQuery = searchParams.get("query") || "";
+  const urlStateId = searchParams.get("stateId") || "";
+  const urlAreaId = searchParams.get("areaId") || "";
+  const urlMarketId = searchParams.get("marketId") || "";
+  const urlSearchType =
+    (searchParams.get("searchType") as SearchType) || "all";
+
+  // ✅ FIX: Create a stable key from all URL params to detect changes
+  const urlKey = useMemo(
+    () =>
+      `${urlQuery}-${urlStateId}-${urlAreaId}-${urlMarketId}-${urlSearchType}-${searchParams.get("_t") || ""}`,
+    [urlQuery, urlStateId, urlAreaId, urlMarketId, urlSearchType, searchParams]
+  );
+
+  const {
+    query,
+    filters,
+    results,
+    isLoading,
+    setQuery,
+    updateFilter,
+    clearFilters,
+  } = useSearch();
+
+  const [searchType, setSearchType] = useState<SearchType>(urlSearchType);
+  const lastUrlKeyRef = useRef("");
+
+  // ✅ FIX: Re-initialize from URL params whenever they change
+  useEffect(() => {
+    if (urlKey === lastUrlKeyRef.current) return;
+    lastUrlKeyRef.current = urlKey;
+
+    // Clear previous filters first
+    clearFilters();
+
+    // Apply URL params
+    if (urlQuery) setQuery(urlQuery);
+    if (urlStateId) updateFilter("stateId", urlStateId);
+    if (urlAreaId) updateFilter("areaId", urlAreaId);
+    if (urlMarketId) updateFilter("marketId", urlMarketId);
+    if (urlSearchType !== "all") {
+      updateFilter("searchType", urlSearchType);
+      setSearchType(urlSearchType);
+    }
+  }, [urlKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handlePageChange = (page: number) => {
+    updateFilter("page", page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleSearchTypeChange = (type: SearchType) => {
+    setSearchType(type);
+    updateFilter("searchType", type);
+  };
+
+  return (
+    <div className="container-premium py-6">
+      <div className="mb-6">
+        <BackButton />
+      </div>
+
+      <div className="mb-6">
+        <SearchBar
+          placeholder="Search products, shops, brands..."
+          autoFocus={!urlQuery}
+        />
+      </div>
+
+      <SearchFilters
+        filters={filters}
+        availableFilters={results?.availableFilters}
+        onFilterChange={updateFilter}
+        onClearFilters={clearFilters}
+        className="mb-6"
+      />
+
+      <SearchResults
+        results={results}
+        isLoading={isLoading}
+        searchType={searchType}
+        onSearchTypeChange={handleSearchTypeChange}
+        onPageChange={handlePageChange}
+        currentPage={filters.page || 1}
+      />
+    </div>
+  );
+}
+import { ProductSearchResult, ProductWithVendors } from './product';
+import { ShopSearchResult } from './vendor';
+
+export type SearchType = 'products' | 'shops' | 'all';
+export type SortBy = 'relevance' | 'price_low' | 'price_high' | 'rating' | 'newest' | 'distance' | 'popularity';
+
+export interface SearchFilters {
+  query: string;
+  searchType?: SearchType;
+  stateId?: string;
+  areaId?: string;
+  marketId?: string;
+  longitude?: number;
+  latitude?: number;
+  maxDistance?: number;
+  category?: string;
+  subcategory?: string;
+  brand?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  inStock?: boolean;
+  verifiedOnly?: boolean;
+  tags?: string[];
+  sortBy?: SortBy;
+  page?: number;
+  limit?: number;
+}
+
+export interface FilterOption {
+  id: string;
+  name: string;
+  count: number;
+}
+
+export interface AvailableFilters {
+  states: FilterOption[];
+  areas: FilterOption[];
+  markets: FilterOption[];
+  categories: { name: string; count: number }[];
+  brands: { name: string; count: number }[];
+  priceRange: { min: number; max: number };
+}
+
+export interface SearchResults {
+  query: string;
+  searchType: string;
+  products?: {
+    items: ProductSearchResult[];
+    total: number;
+    page: number;
+    totalPages: number;
+  };
+  shops?: {
+    items: ShopSearchResult[];
+    total: number;
+    page: number;
+    totalPages: number;
+  };
+  productComparison?: {
+    items: ProductWithVendors[];
+    total: number;
+  };
+  availableFilters: AvailableFilters;
+  meta: {
+    timestamp: string;
+    took: number;
+  };
+}"use client";
+
+import { useState, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useSearchStore } from "@/store";
+import { searchService } from "@/services";
+import { SearchFilters, SearchResults } from "@/types";
+import { useDebounce } from "./use-debounce";
+
+export function useSearch() {
+  const { query, filters, setQuery, setFilters, updateFilter, clearFilters, addRecentSearch } = useSearchStore();
+  const debouncedQuery = useDebounce(query, 300);
+
+  const searchFilters: SearchFilters = {
+    query: debouncedQuery,
+    ...filters,
+  };
+
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ["search", searchFilters],
+    queryFn: () => searchService.search(searchFilters),
+    enabled: debouncedQuery.length > 0 || Object.keys(filters).length > 0,
+    staleTime: 30000,
+  });
+
+  const handleSearch = useCallback(
+    (newQuery: string) => {
+      setQuery(newQuery);
+      if (newQuery.trim()) {
+        addRecentSearch(newQuery.trim());
+      }
+    },
+    [setQuery, addRecentSearch]
+  );
+
+  return {
+    query,
+    filters,
+    results: data,
+    isLoading,
+    error,
+    setQuery: handleSearch,
+    setFilters,
+    updateFilter,
+    clearFilters,
+    refetch,
+  };
+}"use client";
+
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui";
+
+interface BackButtonProps {
+  href?: string;
+  label?: string;
+  className?: string;
+}
+
+export function BackButton({ href, label = "Back" }: BackButtonProps) {
+  const router = useRouter();
+
+  const handleClick = () => {
+    if (href) {
+      router.push(href);
+    } else {
+      router.back();
+    }
+  };
+
+  return (
+    <Button variant="ghost" size="sm" onClick={handleClick}>
+      <ArrowLeft className="mr-2 h-4 w-4" />
+      {label}
+    </Button>
+  );
+}"use client";
+
+import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Search, X, Clock, TrendingUp, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { useSearchStore } from "@/store";
+import { useDebounce } from "@/hooks";
+
+interface SearchBarProps {
+  variant?: "default" | "hero";
+  placeholder?: string;
+  className?: string;
+  autoFocus?: boolean;
+}
+
+const popularSearches = [
+  "iPhone 15",
+  "Samsung Galaxy",
+  "Laptop",
+  "PlayStation 5",
+  "Air Jordan",
+  "MacBook",
+];
+
+export function SearchBar({
+  variant = "default",
+  placeholder = "Search products, shops, brands...",
+  className,
+  autoFocus = false,
+}: SearchBarProps) {
+  const router = useRouter();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isFocused, setIsFocused] = useState(false);
+  const [localQuery, setLocalQuery] = useState("");
+  const { recentSearches, addRecentSearch, clearRecentSearches } = useSearchStore();
+  const debouncedQuery = useDebounce(localQuery, 300);
+
+  useEffect(() => {
+    if (autoFocus && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [autoFocus]);
+
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      addRecentSearch(query.trim());
+      router.push(`/search?query=${encodeURIComponent(query.trim())}`);
+      setIsFocused(false);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSearch(localQuery);
+  };
+
+  const handleClear = () => {
+    setLocalQuery("");
+    inputRef.current?.focus();
+  };
+
+  const isHero = variant === "hero";
+
+  return (
+    <div className={cn("relative", className)}>
+      <form onSubmit={handleSubmit}>
+        <div
+          className={cn(
+            "relative flex items-center transition-all duration-200",
+            isHero
+              ? "rounded-2xl bg-background shadow-2xl ring-1 ring-border"
+              : "rounded-full bg-muted/50 ring-1 ring-transparent focus-within:ring-ring focus-within:bg-background"
+          )}
+        >
+          <Search
+            className={cn(
+              "absolute left-4 text-muted-foreground",
+              isHero ? "h-6 w-6" : "h-5 w-5"
+            )}
+          />
+          <input
+            ref={inputRef}
+            type="text"
+            value={localQuery}
+            onChange={(e) => setLocalQuery(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            placeholder={placeholder}
+            className={cn(
+              "w-full bg-transparent outline-none placeholder:text-muted-foreground",
+              isHero
+                ? "h-16 pl-14 pr-14 text-lg"
+                : "h-12 pl-12 pr-12 text-sm"
+            )}
+          />
+          {localQuery && (
+            <button
+              type="button"
+              onClick={handleClear}
+              className={cn(
+                "absolute right-4 rounded-full p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors",
+                isHero ? "right-14" : "right-4"
+              )}
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+          {isHero && (
+            <button
+              type="submit"
+              className="absolute right-3 rounded-xl bg-primary p-3 text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              <ArrowRight className="h-5 w-5" />
+            </button>
+          )}
+        </div>
+      </form>
+
+      {/* Dropdown */}
+      <AnimatePresence>
+        {isFocused && (
+          <>
+            <div
+              className="fixed inset-0 z-40"
+              onClick={() => setIsFocused(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className={cn(
+                "absolute left-0 right-0 z-50 mt-2 rounded-xl border border-border bg-background p-4 shadow-xl",
+                isHero ? "mt-4" : "mt-2"
+              )}
+            >
+              {/* Recent Searches */}
+              {recentSearches.length > 0 && (
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-muted-foreground">
+                      Recent Searches
+                    </span>
+                    <button
+                      onClick={clearRecentSearches}
+                      className="text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      Clear all
+                    </button>
+                  </div>
+                  <div className="space-y-1">
+                    {recentSearches.slice(0, 5).map((search, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleSearch(search)}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-muted transition-colors"
+                      >
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span>{search}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Popular Searches */}
+              <div>
+                <span className="text-sm font-medium text-muted-foreground mb-2 block">
+                  Popular Searches
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {popularSearches.map((search) => (
+                    <button
+                      key={search}
+                      onClick={() => handleSearch(search)}
+                      className="flex items-center gap-1 rounded-full bg-muted px-3 py-1.5 text-sm hover:bg-muted/80 transition-colors"
+                    >
+                      <TrendingUp className="h-3 w-3 text-muted-foreground" />
+                      {search}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}"use client";
+
+import { useState } from "react";
+import { ChevronDown, X, SlidersHorizontal } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button, Badge, Select } from "@/components/ui";
+import { LocationFilter } from "./location-filter";
+import { PriceFilter } from "./price-filter";
+import { CategoryFilter } from "./category-filter";
+import { SearchFilters as SearchFiltersType, AvailableFilters, SortBy } from "@/types";
+import { SORT_OPTIONS } from "@/lib/constants";
+import { cn } from "@/lib/utils";
+
+interface SearchFiltersProps {
+  filters: Partial<SearchFiltersType>;
+  availableFilters?: AvailableFilters;
+  onFilterChange: (key: keyof SearchFiltersType, value: any) => void;
+  onClearFilters: () => void;
+  className?: string;
+}
+
+export function SearchFilters({
+  filters,
+  availableFilters,
+  onFilterChange,
+  onClearFilters,
+  className,
+}: SearchFiltersProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const activeFilterCount = Object.values(filters).filter(
+    (v) => v !== undefined && v !== null && v !== ""
+  ).length;
+
+  return (
+    <div className={cn("space-y-4", className)}>
+      {/* Filter Bar */}
+      <div className="flex flex-wrap items-center gap-2">
+        {/* Sort */}
+        <Select
+          value={filters.sortBy || "relevance"}
+          onChange={(value) => onFilterChange("sortBy", value as SortBy)}
+          options={SORT_OPTIONS}
+          placeholder="Sort by"
+          className="w-40"
+        />
+
+        {/* Location Filter */}
+        <LocationFilter
+          stateId={filters.stateId}
+          areaId={filters.areaId}
+          marketId={filters.marketId}
+          onStateChange={(id:any) => onFilterChange("stateId", id)}
+          onAreaChange={(id :any) => onFilterChange("areaId", id)}
+          onMarketChange={(id :any) => onFilterChange("marketId", id)}
+        />
+
+        {/* More Filters Button */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="gap-2"
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          Filters
+          {activeFilterCount > 0 && (
+            <Badge variant="secondary" className="ml-1">
+              {activeFilterCount}
+            </Badge>
+          )}
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 transition-transform",
+              isExpanded && "rotate-180"
+            )}
+          />
+        </Button>
+
+        {/* Clear Filters */}
+        {activeFilterCount > 0 && (
+          <Button variant="ghost" size="sm" onClick={onClearFilters}>
+            <X className="mr-1 h-4 w-4" />
+            Clear all
+          </Button>
+        )}
+      </div>
+
+      {/* Expanded Filters */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-xl border border-border bg-muted/30">
+              {/* Price Filter */}
+              <div>
+                <h4 className="text-sm font-medium mb-2">Price Range</h4>
+                <PriceFilter
+                  minPrice={filters.minPrice}
+                  maxPrice={filters.maxPrice}
+                  priceRange={availableFilters?.priceRange}
+                  onMinChange={(value :any) => onFilterChange("minPrice", value)}
+                  onMaxChange={(value :any) => onFilterChange("maxPrice", value)}
+                />
+              </div>
+
+              {/* Category Filter */}
+              <div>
+                <h4 className="text-sm font-medium mb-2">Category</h4>
+                <CategoryFilter
+                  selected={filters.category}
+                  categories={availableFilters?.categories || []}
+                  onChange={(value:any) => onFilterChange("category", value)}
+                />
+              </div>
+
+              {/* Brand Filter */}
+              <div>
+                <h4 className="text-sm font-medium mb-2">Brand</h4>
+                <Select
+                  value={filters.brand || ""}
+                  onChange={(value) => onFilterChange("brand", value)}
+                  options={[
+                    { value: "", label: "All Brands" },
+                    ...(availableFilters?.brands || []).map((b) => ({
+                      value: b.name,
+                      label: `${b.name} (${b.count})`,
+                    })),
+                  ]}
+                  placeholder="Select brand"
+                />
+              </div>
+
+              {/* Additional Filters */}
+              <div className="md:col-span-3 flex flex-wrap gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={filters.inStock === true}
+                    onChange={(e) =>
+                      onFilterChange("inStock", e.target.checked || undefined)
+                    }
+                    className="rounded border-input"
+                  />
+                  <span className="text-sm">In Stock Only</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={filters.verifiedOnly === true}
+                    onChange={(e) =>
+                      onFilterChange("verifiedOnly", e.target.checked || undefined)
+                    }
+                    className="rounded border-input"
+                  />
+                  <span className="text-sm">Verified Shops Only</span>
+                </label>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}// search-results.tsx
+"use client";
+
+import { useState } from "react";
+import { Grid, List, Package, Store } from "lucide-react";
+import { Button, Badge } from "@/components/ui";
+import { ProductGrid, PriceComparison } from "@/components/products";
+import { ShopGrid } from "@/components/shops";
+import { EmptyState, LoadingState, Pagination } from "@/components/common";
+import { SearchResults as SearchResultsType, SearchType } from "@/types";
+import { searchResultToDisplayData } from "@/types/shop-display";  // ✅ Import converter
+import { cn } from "@/lib/utils";
+
+interface SearchResultsProps {
+  results: SearchResultsType | undefined;
+  isLoading: boolean;
+  searchType: SearchType;
+  onSearchTypeChange: (type: SearchType) => void;
+  onPageChange: (page: number) => void;
+  currentPage: number;
+}
+
+export function SearchResults({
+  results,
+  isLoading,
+  searchType,
+  onSearchTypeChange,
+  onPageChange,
+  currentPage,
+}: SearchResultsProps) {
+  const [viewMode, setViewMode] = useState<"grid" | "compare">("grid");
+
+  if (isLoading) {
+    return <LoadingState text="Searching..." />;
+  }
+
+  if (!results) {
+    return (
+      <EmptyState
+        icon={<Package className="h-10 w-10" />}
+        title="Start searching"
+        description="Enter a product name, shop, or category to find what you're looking for"
+      />
+    );
+  }
+
+  const hasProducts = results.products && results.products.items.length > 0;
+  const hasShops = results.shops && results.shops.items.length > 0;
+  const hasComparison =
+    results.productComparison && results.productComparison.items.length > 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Tabs & View Toggle */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <Button
+            variant={
+              searchType === "all" || searchType === "products"
+                ? "default"
+                : "outline"
+            }
+            size="sm"
+            onClick={() => onSearchTypeChange("products")}
+          >
+            <Package className="mr-2 h-4 w-4" />
+            Products
+            {results.products && (
+              <Badge variant="secondary" className="ml-2">
+                {results.products.total}
+              </Badge>
+            )}
+          </Button>
+          <Button
+            variant={searchType === "shops" ? "default" : "outline"}
+            size="sm"
+            onClick={() => onSearchTypeChange("shops")}
+          >
+            <Store className="mr-2 h-4 w-4" />
+            Shops
+            {results.shops && (
+              <Badge variant="secondary" className="ml-2">
+                {results.shops.total}
+              </Badge>
+            )}
+          </Button>
+        </div>
+
+        {(searchType === "all" || searchType === "products") && hasProducts && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">View:</span>
+            <div className="flex rounded-lg border border-border">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={cn(
+                  "p-2 transition-colors",
+                  viewMode === "grid" ? "bg-muted" : "hover:bg-muted/50"
+                )}
+              >
+                <Grid className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("compare")}
+                className={cn(
+                  "p-2 transition-colors",
+                  viewMode === "compare" ? "bg-muted" : "hover:bg-muted/50"
+                )}
+              >
+                <List className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Results */}
+      {searchType === "shops" ? (
+        hasShops ? (
+          <>
+            {/* ✅ Convert ShopSearchResult[] → ShopDisplayData[] */}
+            <ShopGrid
+              shops={results.shops!.items.map(searchResultToDisplayData)}
+            />
+            {results.shops!.totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={results.shops!.totalPages}
+                onPageChange={onPageChange}
+              />
+            )}
+          </>
+        ) : (
+          <EmptyState
+            icon={<Store className="h-10 w-10" />}
+            title="No shops found"
+            description="Try adjusting your search or filters"
+          />
+        )
+      ) : (
+        <>
+          {viewMode === "grid" ? (
+            hasProducts ? (
+              <>
+                <ProductGrid products={results.products!.items} />
+                {results.products!.totalPages > 1 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={results.products!.totalPages}
+                    onPageChange={onPageChange}
+                  />
+                )}
+              </>
+            ) : (
+              <EmptyState
+                icon={<Package className="h-10 w-10" />}
+                title="No products found"
+                description="Try adjusting your search or filters"
+              />
+            )
+          ) : hasComparison ? (
+            <div className="space-y-8">
+              {results.productComparison!.items.map((product) => (
+                <div key={product.id} className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">{product.name}</h3>
+                    <Badge variant="outline">
+                      {product.totalVendors} vendors
+                    </Badge>
+                  </div>
+                  <PriceComparison vendors={product.vendors} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={<Package className="h-10 w-10" />}
+              title="No products to compare"
+              description="Try searching for a specific product"
+            />
+          )}
+        </>
+      )}
+
+      {results.meta && (
+        <p className="text-center text-sm text-muted-foreground">
+          Found in {results.meta.took}ms
+        </p>
+      )}
+    </div>
+  );
+}
+"use client";
+
+import { useState, useEffect } from "react";
+
+export function useDebounce<T>(value: T, delay: number = 500): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}import { api } from "@/lib/api";
+import { SearchFilters, SearchResults, ProductWithVendors } from "@/types";
+
+export const searchService = {
+  async search(filters: SearchFilters): Promise<SearchResults> {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        params.append(key, String(value));
+      }
+    });
+    return api.get<SearchResults>(`/search?${params.toString()}`);
+  },
+
+  async searchProducts(filters: SearchFilters): Promise<SearchResults["products"]> {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        params.append(key, String(value));
+      }
+    });
+    return api.get<SearchResults["products"]>(`/search/products?${params.toString()}`);
+  },
+
+  async searchShops(filters: SearchFilters): Promise<SearchResults["shops"]> {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        params.append(key, String(value));
+      }
+    });
+    return api.get<SearchResults["shops"]>(`/search/shops?${params.toString()}`);
+  },
+
+  async getProductVendors(productName: string, filters?: Partial<SearchFilters>): Promise<ProductWithVendors> {
+    const params = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          params.append(key, String(value));
+        }
+      });
+    }
+    return api.get<ProductWithVendors>(`/search/product/${encodeURIComponent(productName)}/vendors?${params.toString()}`);
+  },
+
+  async getShopProducts(vendorId: string, filters?: { category?: string; minPrice?: number; maxPrice?: number; page?: number }): Promise<any> {
+    const params = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          params.append(key, String(value));
+        }
+      });
+    }
+    return api.get(`/search/shop/${vendorId}/products?${params.toString()}`);
+  },
+
+  async getSimilarProducts(productId: string, limit: number = 10): Promise<any[]> {
+    return api.get(`/search/product/${productId}/similar?limit=${limit}`);
+  },
+};// import { create } from "zustand";
+// import { SearchFilters, AvailableFilters } from "@/types";
+
+// interface SearchState {
+//   query: string;
+//   filters: Partial<SearchFilters>;
+//   availableFilters: AvailableFilters | null;
+//   recentSearches: string[];
+//   setQuery: (query: string) => void;
+//   setFilters: (filters: Partial<SearchFilters>) => void;
+//   updateFilter: (key: keyof SearchFilters, value: any) => void;
+//   clearFilters: () => void;
+//   setAvailableFilters: (filters: AvailableFilters) => void;
+//   addRecentSearch: (search: string) => void;
+//   clearRecentSearches: () => void;
+// }
+
+// export const useSearchStore = create<SearchState>((set, get) => ({
+//   query: "",
+//   filters: {},
+//   availableFilters: null,
+//   recentSearches: [],
+  
+//   setQuery: (query) => set({ query }),
+  
+//   setFilters: (filters) => set({ filters }),
+  
+//   updateFilter: (key, value) =>
+//     set((state) => ({
+//       filters: { ...state.filters, [key]: value },
+//     })),
+  
+//   clearFilters: () => set({ filters: {}, query: "" }),
+  
+//   setAvailableFilters: (availableFilters) => set({ availableFilters }),
+  
+//   addRecentSearch: (search) =>
+//     set((state) => ({
+//       recentSearches: [search, ...state.recentSearches.filter((s) => s !== search)].slice(0, 10),
+//     })),
+  
+//   clearRecentSearches: () => set({ recentSearches: [] }),
+// }));
+// src/store/search-store.ts
+import { create } from "zustand";
+import { SearchFilters, AvailableFilters } from "@/types";
+
+interface SearchState {
+  query: string;
+  filters: Partial<SearchFilters>;
+  availableFilters: AvailableFilters | null;
+  recentSearches: string[];
+  setQuery: (query: string) => void;
+  setFilters: (filters: Partial<SearchFilters>) => void;
+  updateFilter: (key: keyof SearchFilters, value: any) => void;
+  clearFilters: () => void;
+  setAvailableFilters: (filters: AvailableFilters) => void;
+  addRecentSearch: (search: string) => void;
+  clearRecentSearches: () => void;
+}
+
+export const useSearchStore = create<SearchState>((set, get) => ({
+  query: "",
+  filters: {},
+  availableFilters: null,
+  recentSearches: [],
+
+  setQuery: (query) => set({ query }),
+
+  setFilters: (filters) => set({ filters }),
+
+  updateFilter: (key, value) =>
+    set((state) => {
+      // ✅ FIX: Remove filter if value is undefined/null/empty
+      const newFilters = { ...state.filters };
+      if (value === undefined || value === null || value === "") {
+        delete newFilters[key];
+      } else {
+        newFilters[key] = value;
+      }
+      return { filters: newFilters };
+    }),
+
+  // ✅ FIX: Clear both query AND filters
+  clearFilters: () => set({ filters: {}, query: "" }),
+
+  setAvailableFilters: (availableFilters) => set({ availableFilters }),
+
+  addRecentSearch: (search) =>
+    set((state) => ({
+      recentSearches: [
+        search,
+        ...state.recentSearches.filter((s) => s !== search),
+      ].slice(0, 10),
+    })),
+
+  clearRecentSearches: () => set({ recentSearches: [] }),
+}));

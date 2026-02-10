@@ -1,6 +1,7 @@
 // src/app/(vendor)/vendor/products/[id]/page.tsx
 "use client";
 
+import { use } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui";
@@ -9,23 +10,27 @@ import { ProductForm } from "@/components/forms/product-form";
 import { useUpdateProduct } from "@/hooks";
 import { productService } from "@/services";
 
+// ✅ FIX: params is a Promise in Next.js 15
 interface EditProductPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default function EditProductPage({ params }: EditProductPageProps) {
+  // ✅ FIX: Unwrap with React.use()
+  const { id } = use(params);
+
   const router = useRouter();
   const updateProduct = useUpdateProduct();
 
   const { data: product, isLoading } = useQuery({
-    queryKey: ["product", params.id],
-    queryFn: () => productService.getById(params.id),
-    enabled: !!params.id,
+    queryKey: ["product", id],
+    queryFn: () => productService.getById(id),
+    enabled: !!id,
   });
 
   const handleSubmit = async (data: any) => {
     try {
-      await updateProduct.mutateAsync({ id: params.id, data });
+      await updateProduct.mutateAsync({ id, data });
       router.push("/vendor/products");
     } catch (error) {
       // handled by mutation
