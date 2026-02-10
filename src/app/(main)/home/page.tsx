@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button, Card } from "@/components/ui";
 import { HomeSearch } from "@/components/search/home-search";
+import { HeroCarousel } from "@/components/hero-carousel";
 import { CATEGORIES } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -21,8 +22,9 @@ export default function HomePage() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative bg-gradient-to-b from-muted/50 to-background pt-12 pb-20">
-        <div className="container-premium">
+      <section className="relative pt-12 pb-20 min-h-[600px] flex items-center justify-center overflow-hidden">
+        <HeroCarousel />
+        <div className="container-premium relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
               Find Products.{" "}
