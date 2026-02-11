@@ -211,7 +211,7 @@ export function Header() {
       )}
 
       {/* Use GPS */}
-      <button
+      {/* <button
         onClick={() => {
           if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -233,7 +233,7 @@ export function Header() {
       >
         <Navigation className="h-4 w-4" />
         Use my current location
-      </button>
+      </button> */}
 
       {/* Done */}
       <Button
