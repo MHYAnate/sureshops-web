@@ -28,12 +28,10 @@ export default function HomePage() {
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
               Find Products.{" "}
-              <span className="text-muted-foreground">Compare Prices.</span>
+              <span className="text-muted-foreground">And Shops.</span>
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Standing in the parking lot? Set your market location, search for
-              any product, and instantly see every shop that has it — with
-              prices, shop numbers, and directions.
+               The Sure Way to Shop.
             </p>
 
             <div className="mt-10 max-w-2xl mx-auto">
