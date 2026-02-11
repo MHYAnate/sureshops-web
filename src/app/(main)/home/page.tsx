@@ -27,11 +27,11 @@ export default function HomePage() {
         <div className="container-premium relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-              Find Products.{" "}
-              <span className="text-muted-foreground">And Shops.</span>
+            The Sure Way to Shop.{" "}
+              {/* <span className="text-muted-foreground">And Shops.</span> */}
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
-               The Sure Way to Shop.
+            Shop with Confidence. Locate with Precision.
             </p>
 
             <div className="mt-10 max-w-2xl mx-auto">
