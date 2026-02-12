@@ -10,7 +10,7 @@ export default function AuthLayout({
     <div className="min-h-screen flex">
       {/* Left - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-foreground text-background flex-col justify-between p-12">
-        <Logo className="text-background [&_div]:bg-background [&_span]:text-background" />
+        <Logo  className="flex-shrink-0" />
 
         <div className="space-y-6">
           <h1 className="text-4xl font-bold leading-tight">

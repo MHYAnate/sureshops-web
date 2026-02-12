@@ -14,8 +14,6 @@ import {
 } from "@/components/ui";
 import { LoadingState, Pagination } from "@/components/common";
 import { adminService } from "@/services/admin.service";
-import { Product } from "@/types";
-import { formatPrice } from "@/lib/utils";
 import {
   Search,
   CheckCircle,
@@ -32,13 +30,17 @@ const STATUS_OPTIONS = [
   { value: "rejected", label: "Rejected" },
 ];
 
+function formatPrice(price: number): string {
+  return `₦${price.toLocaleString()}`;
+}
+
 export default function AdminProductsPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [showActionModal, setShowActionModal] = useState(false);
 
   const { data, isLoading } = useQuery({
@@ -64,19 +66,20 @@ export default function AdminProductsPage() {
     }) => adminService.productAction(id, action, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+      queryClient.invalidateQueries({ queryKey: ["pending-products"] });
       setShowActionModal(false);
       setSelectedProduct(null);
-      toast.success("Action completed successfully");
+      toast.success("Action completed");
     },
     onError: () => toast.error("Action failed"),
   });
 
   const bulkApproveMutation = useMutation({
     mutationFn: (ids: string[]) => adminService.bulkApproveProducts(ids),
-    onSuccess: (count) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       setSelectedProducts([]);
-      toast.success(`${count} products approved`);
+      toast.success("Products approved");
     },
     onError: () => toast.error("Bulk action failed"),
   });
@@ -91,7 +94,7 @@ export default function AdminProductsPage() {
     if (selectedProducts.length === data.items.length) {
       setSelectedProducts([]);
     } else {
-      setSelectedProducts(data.items.map((p: any) => p._id));
+      setSelectedProducts(data.items.map((p: any) => p.id));
     }
   };
 
@@ -151,7 +154,7 @@ export default function AdminProductsPage() {
         </div>
       </Card>
 
-      {/* Products Table */}
+      {/* Table */}
       <Card>
         {isLoading ? (
           <LoadingState />
@@ -163,7 +166,10 @@ export default function AdminProductsPage() {
                   <th className="text-left p-4">
                     <input
                       type="checkbox"
-                      checked={selectedProducts.length === data.items.length}
+                      checked={
+                        data.items.length > 0 &&
+                        selectedProducts.length === data.items.length
+                      }
                       onChange={handleSelectAll}
                       className="rounded border-input"
                     />
@@ -179,20 +185,20 @@ export default function AdminProductsPage() {
               <tbody>
                 {data.items.map((product: any) => (
                   <tr
-                    key={product._id}
+                    key={product.id}
                     className="border-b border-border last:border-0"
                   >
                     <td className="p-4">
                       <input
                         type="checkbox"
-                        checked={selectedProducts.includes(product._id)}
-                        onChange={() => handleSelectProduct(product._id)}
+                        checked={selectedProducts.includes(product.id)}
+                        onChange={() => handleSelectProduct(product.id)}
                         className="rounded border-input"
                       />
                     </td>
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="relative h-12 w-12 rounded-lg bg-muted overflow-hidden">
+                        <div className="relative h-12 w-12 rounded-lg bg-muted overflow-hidden flex-shrink-0">
                           {product.images?.[0] ? (
                             <Image
                               src={product.images[0]}
@@ -206,8 +212,8 @@ export default function AdminProductsPage() {
                             </div>
                           )}
                         </div>
-                        <div>
-                          <p className="font-medium line-clamp-1 max-w-[200px]">
+                        <div className="min-w-0">
+                          <p className="font-medium truncate max-w-[200px]">
                             {product.name}
                           </p>
                           <p className="text-xs text-muted-foreground">
@@ -228,20 +234,23 @@ export default function AdminProductsPage() {
                           product.status === "approved"
                             ? "success"
                             : product.status === "pending"
-                            ? "warning"
-                            : "destructive"
+                              ? "warning"
+                              : "destructive"
                         }
                       >
                         {product.status}
                       </Badge>
                     </td>
                     <td className="p-4 text-sm text-muted-foreground">
-                      {product.views}
+                      {product.views || 0}
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button variant="ghost" size="icon" asChild>
-                          <Link href={`/products/${product._id}`} target="_blank">
+                          <Link
+                            href={`/products/${product.id}`}
+                            target="_blank"
+                          >
                             <Eye className="h-4 w-4" />
                           </Link>
                         </Button>
@@ -249,10 +258,7 @@ export default function AdminProductsPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => {
-                            setSelectedProduct({
-                              ...product,
-                              id: product._id,
-                            });
+                            setSelectedProduct(product);
                             setShowActionModal(true);
                           }}
                         >
@@ -272,7 +278,6 @@ export default function AdminProductsPage() {
         )}
       </Card>
 
-      {/* Pagination */}
       {data && data.totalPages > 1 && (
         <Pagination
           currentPage={page}
@@ -317,7 +322,7 @@ export default function AdminProductsPage() {
               <Button
                 variant="outline"
                 onClick={() => handleAction("delete")}
-                className="gap-2 col-span-2"
+                className="gap-2 col-span-2 text-destructive"
                 disabled={actionMutation.isPending}
               >
                 Delete Product

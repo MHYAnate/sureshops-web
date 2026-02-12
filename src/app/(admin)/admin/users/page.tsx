@@ -13,8 +13,7 @@ import {
 } from "@/components/ui";
 import { LoadingState, Pagination } from "@/components/common";
 import { adminService } from "@/services/admin.service";
-import { User } from "@/types";
-import { Search, MoreHorizontal, Edit, Trash2, Shield } from "lucide-react";
+import { Search, Trash2, Shield } from "lucide-react";
 import toast from "react-hot-toast";
 
 const ROLES = [
@@ -30,7 +29,7 @@ export default function AdminUsersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [showRoleModal, setShowRoleModal] = useState(false);
 
   const { data, isLoading } = useQuery({
@@ -59,34 +58,31 @@ export default function AdminUsersPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       setShowRoleModal(false);
+      setSelectedUser(null);
       toast.success("Role updated");
     },
     onError: () => toast.error("Failed to update role"),
   });
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setPage(1);
-  };
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Users</h1>
-          <p className="text-muted-foreground">Manage platform users</p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold">Users</h1>
+        <p className="text-muted-foreground">Manage platform users</p>
       </div>
 
       {/* Filters */}
       <Card className="p-4">
-        <form onSubmit={handleSearch} className="flex gap-4">
-          <div className="flex-1 relative">
+        <div className="flex gap-4 flex-wrap">
+          <div className="flex-1 min-w-[200px] relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search users..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               className="pl-10"
             />
           </div>
@@ -99,7 +95,7 @@ export default function AdminUsersPage() {
             options={ROLES}
             className="w-40"
           />
-        </form>
+        </div>
       </Card>
 
       {/* Users Table */}
@@ -120,8 +116,11 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {data.items.map((user: User) => (
-                  <tr key={user.id} className="border-b border-border last:border-0">
+                {data.items.map((user: any) => (
+                  <tr
+                    key={user.id}
+                    className="border-b border-border last:border-0"
+                  >
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <Avatar
@@ -141,19 +140,21 @@ export default function AdminUsersPage() {
                           user.role === "super_admin"
                             ? "default"
                             : user.role === "admin"
-                            ? "secondary"
-                            : "outline"
+                              ? "secondary"
+                              : "outline"
                         }
                       >
                         {user.role}
                       </Badge>
                     </td>
                     <td className="p-4">
-                      <Badge variant={user.isActive ? "success" : "destructive"}>
+                      <Badge
+                        variant={user.isActive ? "success" : "destructive"}
+                      >
                         {user.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </td>
-                    <td className="p-4 text-muted-foreground">
+                    <td className="p-4 text-muted-foreground text-sm">
                       {new Date(user.createdAt).toLocaleDateString()}
                     </td>
                     <td className="p-4 text-right">
@@ -161,6 +162,7 @@ export default function AdminUsersPage() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          title="Change role"
                           onClick={() => {
                             setSelectedUser(user);
                             setShowRoleModal(true);
@@ -171,8 +173,13 @@ export default function AdminUsersPage() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          title="Delete user"
                           onClick={() => {
-                            if (confirm("Delete this user?")) {
+                            if (
+                              confirm(
+                                `Delete ${user.firstName} ${user.lastName}?`
+                              )
+                            ) {
                               deleteUserMutation.mutate(user.id);
                             }
                           }}
@@ -193,7 +200,6 @@ export default function AdminUsersPage() {
         )}
       </Card>
 
-      {/* Pagination */}
       {data && data.totalPages > 1 && (
         <Pagination
           currentPage={page}
@@ -216,13 +222,30 @@ export default function AdminUsersPage() {
                 {selectedUser.firstName} {selectedUser.lastName}
               </strong>
             </p>
-            <Select
-              value={selectedUser.role}
-              onChange={(role) => {
-                changeRoleMutation.mutate({ id: selectedUser.id, role });
-              }}
-              options={ROLES.filter((r) => r.value)}
-            />
+            <p className="text-sm text-muted-foreground">
+              Current role:{" "}
+              <Badge variant="outline">{selectedUser.role}</Badge>
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {ROLES.filter((r) => r.value && r.value !== selectedUser.role).map(
+                (role) => (
+                  <Button
+                    key={role.value}
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      changeRoleMutation.mutate({
+                        id: selectedUser.id,
+                        role: role.value,
+                      })
+                    }
+                    disabled={changeRoleMutation.isPending}
+                  >
+                    {role.label}
+                  </Button>
+                )
+              )}
+            </div>
           </div>
         )}
       </Modal>

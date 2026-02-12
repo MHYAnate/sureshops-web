@@ -1,30 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Button, Input } from "@/components/ui";
+import { useMutation } from "@tanstack/react-query";
+import { Card, Button } from "@/components/ui";
 import { adminService } from "@/services/admin.service";
 import toast from "react-hot-toast";
-import { Database, RefreshCw } from "lucide-react";
+import { Database, RefreshCw, Shield, Server } from "lucide-react";
 
 export default function AdminSettingsPage() {
-  const [seeding, setSeeding] = useState(false);
-
-  const handleSeedAdmins = async () => {
-    setSeeding(true);
-    try {
-      await adminService.seedAdmins();
-      toast.success("Admin users seeded successfully");
-    } catch (error) {
-      toast.error("Failed to seed admin users");
-    } finally {
-      setSeeding(false);
-    }
-  };
+  const seedAdminsMutation = useMutation({
+    mutationFn: () => adminService.seedAdmins(),
+    onSuccess: () => toast.success("Admin users seeded successfully"),
+    onError: () => toast.error("Failed to seed admin users"),
+  });
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Admin Settings</h1>
+        <h1 className="text-2xl font-bold">Settings</h1>
         <p className="text-muted-foreground">
           System configuration and maintenance
         </p>
@@ -37,18 +30,19 @@ export default function AdminSettingsPage() {
           Database Seeding
         </h2>
         <p className="text-sm text-muted-foreground mb-4">
-          Initialize the database with default data. Use with caution.
+          Initialize the database with default data. Safe to run multiple times
+          — existing records are skipped.
         </p>
         <div className="flex flex-wrap gap-4">
           <Button
             variant="outline"
-            onClick={handleSeedAdmins}
-            disabled={seeding}
+            onClick={() => seedAdminsMutation.mutate()}
+            disabled={seedAdminsMutation.isPending}
           >
-            {seeding ? (
+            {seedAdminsMutation.isPending ? (
               <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <Database className="mr-2 h-4 w-4" />
+              <Shield className="mr-2 h-4 w-4" />
             )}
             Seed Admin Users
           </Button>
@@ -67,11 +61,14 @@ export default function AdminSettingsPage() {
 
       {/* App Info */}
       <Card className="p-6">
-        <h2 className="font-semibold mb-4">Application Info</h2>
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        <h2 className="font-semibold mb-4 flex items-center gap-2">
+          <Server className="h-5 w-5" />
+          Application Info
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-muted-foreground">Version</span>
-            <p className="font-medium">1.0.0</p>
+            <p className="font-medium">1.0.0 (MVP)</p>
           </div>
           <div>
             <span className="text-muted-foreground">Environment</span>
@@ -79,10 +76,10 @@ export default function AdminSettingsPage() {
               {process.env.NODE_ENV || "development"}
             </p>
           </div>
-          <div>
+          <div className="sm:col-span-2">
             <span className="text-muted-foreground">API URL</span>
-            <p className="font-medium font-mono text-xs">
-              {process.env.NEXT_PUBLIC_API_URL}
+            <p className="font-medium font-mono text-xs break-all">
+              {process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}
             </p>
           </div>
         </div>

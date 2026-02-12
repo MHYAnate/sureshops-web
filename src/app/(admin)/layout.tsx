@@ -35,7 +35,8 @@ export default function AdminLayout({
   return (
     <div className="min-h-screen bg-muted/30">
       <AdminSidebar />
-      <main className="lg:pl-64">
+      {/* Add top padding on mobile for the mobile header bar */}
+      <main className="lg:pl-64 pt-16 lg:pt-0">
         <div className="container-premium py-8">{children}</div>
       </main>
     </div>

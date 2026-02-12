@@ -1,5 +1,3 @@
-import { User, Vendor, Product } from './index';
-
 export interface DashboardStats {
   users: {
     total: number;
@@ -33,7 +31,11 @@ export interface DashboardStats {
 }
 
 export interface RecentActivity {
-  type: string;
+  type:
+    | "user_registered"
+    | "vendor_created"
+    | "product_added"
+    | "vendor_verified";
   message: string;
   timestamp: string;
   data?: any;
@@ -48,4 +50,12 @@ export interface AdminFilters {
   isActive?: boolean;
   isVerified?: boolean;
   isFeatured?: boolean;
+  vendorId?: string;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  totalPages: number;
 }

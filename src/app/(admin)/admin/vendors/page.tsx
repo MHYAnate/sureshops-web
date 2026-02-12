@@ -14,7 +14,6 @@ import {
 } from "@/components/ui";
 import { LoadingState, Pagination } from "@/components/common";
 import { adminService } from "@/services/admin.service";
-import { Vendor } from "@/types";
 import {
   Search,
   CheckCircle,
@@ -29,8 +28,8 @@ export default function AdminVendorsPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [verifiedFilter, setVerifiedFilter] = useState<string>("");
-  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
+  const [verifiedFilter, setVerifiedFilter] = useState("");
+  const [selectedVendor, setSelectedVendor] = useState<any | null>(null);
   const [showActionModal, setShowActionModal] = useState(false);
 
   const { data, isLoading } = useQuery({
@@ -40,7 +39,10 @@ export default function AdminVendorsPage() {
         page,
         limit: 20,
         search: search || undefined,
-        isVerified: verifiedFilter === "" ? undefined : verifiedFilter === "true",
+        isVerified:
+          verifiedFilter === ""
+            ? undefined
+            : verifiedFilter === "true",
       }),
   });
 
@@ -56,9 +58,10 @@ export default function AdminVendorsPage() {
     }) => adminService.vendorAction(id, action, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-vendors"] });
+      queryClient.invalidateQueries({ queryKey: ["pending-vendors"] });
       setShowActionModal(false);
       setSelectedVendor(null);
-      toast.success("Action completed successfully");
+      toast.success("Action completed");
     },
     onError: () => toast.error("Action failed"),
   });
@@ -70,11 +73,9 @@ export default function AdminVendorsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Vendors</h1>
-          <p className="text-muted-foreground">Manage vendor accounts</p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold">Vendors</h1>
+        <p className="text-muted-foreground">Manage vendor accounts</p>
       </div>
 
       {/* Filters */}
@@ -108,7 +109,7 @@ export default function AdminVendorsPage() {
         </div>
       </Card>
 
-      {/* Vendors Table */}
+      {/* Table */}
       <Card>
         {isLoading ? (
           <LoadingState />
@@ -128,7 +129,7 @@ export default function AdminVendorsPage() {
               <tbody>
                 {data.items.map((vendor: any) => (
                   <tr
-                    key={vendor._id}
+                    key={vendor.id}
                     className="border-b border-border last:border-0"
                   >
                     <td className="p-4">
@@ -141,7 +142,7 @@ export default function AdminVendorsPage() {
                         <div>
                           <p className="font-medium">{vendor.businessName}</p>
                           <p className="text-xs text-muted-foreground">
-                            {vendor.vendorType}
+                            {vendor.vendorType?.replace(/_/g, " ")}
                           </p>
                         </div>
                       </div>
@@ -155,10 +156,13 @@ export default function AdminVendorsPage() {
                       </p>
                     </td>
                     <td className="p-4 text-sm text-muted-foreground">
-                      {vendor.areaId?.name}, {vendor.stateId?.name}
+                      {vendor.areaId?.name}
+                      {vendor.stateId?.name
+                        ? `, ${vendor.stateId.name}`
+                        : ""}
                     </td>
                     <td className="p-4">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <Badge
                           variant={vendor.isVerified ? "success" : "warning"}
                         >
@@ -173,7 +177,10 @@ export default function AdminVendorsPage() {
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button variant="ghost" size="icon" asChild>
-                          <Link href={`/shops/${vendor._id}`} target="_blank">
+                          <Link
+                            href={`/shops/${vendor.id}`}
+                            target="_blank"
+                          >
                             <Eye className="h-4 w-4" />
                           </Link>
                         </Button>
@@ -201,7 +208,6 @@ export default function AdminVendorsPage() {
         )}
       </Card>
 
-      {/* Pagination */}
       {data && data.totalPages > 1 && (
         <Pagination
           currentPage={page}
@@ -243,7 +249,7 @@ export default function AdminVendorsPage() {
                   Suspend
                 </Button>
               )}
-              {!selectedVendor.isFeatured && (
+              {!selectedVendor.isFeatured ? (
                 <Button
                   variant="outline"
                   onClick={() => handleAction("feature")}
@@ -253,8 +259,7 @@ export default function AdminVendorsPage() {
                   <Star className="h-4 w-4" />
                   Feature
                 </Button>
-              )}
-              {selectedVendor.isFeatured && (
+              ) : (
                 <Button
                   variant="outline"
                   onClick={() => handleAction("unfeature")}

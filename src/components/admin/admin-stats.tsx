@@ -3,10 +3,16 @@
 import { Users, Store, Package, MapPin, Eye, Search } from "lucide-react";
 import { Card } from "@/components/ui";
 import { DashboardStats } from "@/types/admin";
-import { formatNumber } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 interface AdminStatsProps {
   stats: DashboardStats;
+}
+
+function formatNumber(num: number): string {
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+  return String(num);
 }
 
 export function AdminStats({ stats }: AdminStatsProps) {
@@ -99,8 +105,4 @@ export function AdminStats({ stats }: AdminStatsProps) {
       })}
     </div>
   );
-}
-
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(" ");
 }
